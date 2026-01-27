@@ -215,9 +215,9 @@ class GameReportScreen(tool.State):
                 employee_id = entry.get('employee_id', '')
                 score = entry.get('score', 0)
 
-                # 组合显示姓名和工号
+                # 组合显示姓名和工号（无括号）
                 if employee_id:
-                    display_name = f"{name}({employee_id})"
+                    display_name = f"{name}{employee_id}"
                 else:
                     display_name = name
 
