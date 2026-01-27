@@ -49,7 +49,7 @@ class Menu(tool.State):
             self.option_timer = self.option_start = self.current_time
         return False
         
-    def update(self, surface, current_time, mouse_pos, mouse_click):
+    def update(self, surface, current_time, mouse_pos, mouse_click, events):
         self.current_time = self.game_info[c.CURRENT_TIME] = current_time
         
         if not self.option_clicked:

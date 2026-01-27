@@ -23,6 +23,9 @@ RED          = (255,   0,   0)
 PURPLE       = (255,   0, 255)
 GOLD         = (255, 215,   0)
 GREEN        = (  0, 255,   0)
+ORANGE       = (255, 165,   0)
+TEAL         = ( 64, 224, 208)
+LIGHT_BLUE   = (100, 149, 237)
 
 SIZE_MULTIPLIER = 1.3
 
@@ -31,10 +34,13 @@ CURRENT_TIME = 'current time'
 LEVEL_NUM = 'level num'
 
 #STATES FOR ENTIRE GAME
+LOADING_SCREEN = 'loading screen'
+LOGIN_SCREEN = 'login screen'
 MAIN_MENU = 'main menu'
 LOAD_SCREEN = 'load screen'
 GAME_LOSE = 'game los'
 GAME_VICTORY = 'game victory'
+GAME_REPORT = 'game report'
 LEVEL = 'level'
 
 MAIN_MENU_IMAGE = 'MainMenu'
@@ -178,3 +184,21 @@ PLAY = 'play'
 #BACKGROUND
 BACKGROUND_DAY = 0
 BACKGROUND_NIGHT = 1
+
+#LANGUAGE
+LANGUAGE_ZH_CN = 'zh_CN'
+LANGUAGE_EN_US = 'en_US'
+
+#ZOMBIE SCORES
+ZOMBIE_SCORES = {
+    NORMAL_ZOMBIE: 10,
+    FLAG_ZOMBIE: 15,
+    NEWSPAPER_ZOMBIE: 20,
+    CONEHEAD_ZOMBIE: 25,
+    BUCKETHEAD_ZOMBIE: 50
+}
+
+#GAME MODE
+GAME_MODE_NORMAL = 'normal'
+GAME_MODE_CRAZY = 'crazy'
+CRAZY_MODE_DURATION = 120000  # 120 seconds in milliseconds

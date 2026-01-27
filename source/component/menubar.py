@@ -206,8 +206,43 @@ class MenuBar():
         self.value_rect = self.value_image.get_rect()
         self.value_rect.x = 21
         self.value_rect.y = self.rect.bottom - 21
-        
+
         self.image.blit(self.value_image, self.value_rect)
+
+    def drawScore(self, surface, score):
+        """绘制分数显示"""
+        font = pg.font.SysFont('Arial', 24)
+        score_text = font.render(f'Score: {score}', True, c.GOLD)
+        surface.blit(score_text, (550, 10))
+
+    def drawTimer(self, surface, remaining_time):
+        """绘制倒计时
+        Args:
+            surface: 绘制表面
+            remaining_time: 剩余时间（毫秒）
+        """
+        if remaining_time is None:
+            return
+
+        # 转换为秒
+        seconds = remaining_time // 1000
+        minutes = seconds // 60
+        seconds = seconds % 60
+
+        font = pg.font.SysFont('Arial', 24)
+        time_text = font.render(f'Time: {minutes:02d}:{seconds:02d}', True, c.WHITE)
+        surface.blit(time_text, (550, 40))
+
+    def drawKills(self, surface, kills):
+        """绘制总击杀数
+        Args:
+            surface: 绘制表面
+            kills: 击杀数字典
+        """
+        total_kills = sum(kills.values())
+        font = pg.font.SysFont('Arial', 24)
+        kills_text = font.render(f'Kills: {total_kills}', True, c.WHITE)
+        surface.blit(kills_text, (550, 70))
 
     def draw(self, surface):
         self.drawSunValue()

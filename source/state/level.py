@@ -2,10 +2,74 @@ __author__ = 'marble_xu'
 
 import os
 import json
+import random
 import pygame as pg
 from .. import tool
 from .. import constants as c
 from ..component import map, plant, zombie, menubar
+
+
+class CrazyModeSpawner:
+    """疯狂模式僵尸动态生成器"""
+
+    def __init__(self, config, map_y_len):
+        """
+        Args:
+            config: 生成配置，包含：
+                - initial_interval: 初始生成间隔（毫秒）
+                - min_interval: 最小生成间隔（毫秒）
+                - interval_decrease_rate: 间隔递减率
+                - spawn_probability: 各类僵尸生成概率字典
+            map_y_len: 地图行数
+        """
+        self.current_interval = config['initial_interval']
+        self.min_interval = config['min_interval']
+        self.decrease_rate = config['interval_decrease_rate']
+        self.spawn_prob = config['spawn_probability']
+        self.last_spawn_time = 0
+        self.map_y_len = map_y_len
+
+    def should_spawn(self, current_time):
+        """
+        检查是否应该生成僵尸
+        Args:
+            current_time: 当前游戏时间（毫秒）
+        Returns:
+            bool: 如果应该生成僵尸返回 True
+        """
+        if current_time - self.last_spawn_time >= self.current_interval:
+            self.last_spawn_time = current_time
+            # 逐渐缩短生成间隔
+            self.current_interval = max(
+                self.min_interval,
+                int(self.current_interval * self.decrease_rate)
+            )
+            return True
+        return False
+
+    def get_zombie_type(self):
+        """
+        根据概率随机选择僵尸类型
+        Returns:
+            str: 僵尸类型名称
+        """
+        rand = random.random()
+        cumulative = 0
+        for zombie_type, prob in self.spawn_prob.items():
+            cumulative += prob
+            if rand <= cumulative:
+                return zombie_type
+        # 如果没有匹配到（概率和不为1的情况），返回普通僵尸
+        return c.NORMAL_ZOMBIE
+
+    def get_random_map_y(self):
+        """
+        随机选择一个地图行
+        Returns:
+            int: 地图行索引（0 到 map_y_len-1）
+        """
+        return random.randint(0, self.map_y_len - 1)
+
 
 class Level(tool.State):
     def __init__(self):
@@ -69,7 +133,7 @@ class Level(tool.State):
             _, y = self.map.getMapGridPos(0, i)
             self.cars.append(plant.Car(-25, y+20, i))
 
-    def update(self, surface, current_time, mouse_pos, mouse_click):
+    def update(self, surface, current_time, mouse_pos, mouse_click, events):
         self.current_time = self.game_info[c.CURRENT_TIME] = current_time
         if self.state == c.CHOOSE:
             self.choose(mouse_pos, mouse_click)
@@ -123,17 +187,57 @@ class Level(tool.State):
             self.produce_sun = False
         self.sun_timer = self.current_time
 
+        # 积分系统
+        self.score = 0
+        self.zombies_killed = {
+            c.NORMAL_ZOMBIE: 0,
+            c.CONEHEAD_ZOMBIE: 0,
+            c.BUCKETHEAD_ZOMBIE: 0,
+            c.FLAG_ZOMBIE: 0,
+            c.NEWSPAPER_ZOMBIE: 0
+        }
+
+        # 检查是否是疯狂模式
+        self.is_crazy_mode = self.map_data.get('game_mode') == c.GAME_MODE_CRAZY
+        if self.is_crazy_mode:
+            self.game_duration = self.map_data.get('game_duration', c.CRAZY_MODE_DURATION)
+            self.crazy_start_time = 0
+            # 初始化疯狂模式生成器
+            spawn_config = self.map_data.get('zombie_spawn_config', {
+                'initial_interval': 3000,
+                'min_interval': 1000,
+                'interval_decrease_rate': 0.95,
+                'spawn_probability': {
+                    c.NORMAL_ZOMBIE: 0.4,
+                    c.CONEHEAD_ZOMBIE: 0.25,
+                    c.BUCKETHEAD_ZOMBIE: 0.15,
+                    c.FLAG_ZOMBIE: 0.1,
+                    c.NEWSPAPER_ZOMBIE: 0.1
+                }
+            })
+            self.crazy_spawner = CrazyModeSpawner(spawn_config, self.map_y_len)
+
         self.removeMouseImage()
         self.setupGroups()
         self.setupZombies()
         self.setupCars()
 
     def play(self, mouse_pos, mouse_click):
+        # 僵尸生成逻辑
         if self.zombie_start_time == 0:
             self.zombie_start_time = self.current_time
+            if self.is_crazy_mode:
+                self.crazy_start_time = self.current_time
+        elif self.is_crazy_mode:
+            # 疯狂模式：使用动态生成器
+            if self.crazy_spawner.should_spawn(self.current_time):
+                zombie_type = self.crazy_spawner.get_zombie_type()
+                map_y = self.crazy_spawner.get_random_map_y()
+                self.createZombie(zombie_type, map_y)
         elif len(self.zombie_list) > 0:
+            # 普通模式：使用预定义列表
             data = self.zombie_list[0]
-            if  data[0] <= (self.current_time - self.zombie_start_time):
+            if data[0] <= (self.current_time - self.zombie_start_time):
                 self.createZombie(data[1], data[2])
                 self.zombie_list.remove(data)
 
@@ -184,6 +288,7 @@ class Level(tool.State):
         self.checkZombieCollisions()
         self.checkPlants()
         self.checkCarCollisions()
+        self.checkZombieKills()  # 检查僵尸击杀并计分
         self.checkGameState()
 
     def createZombie(self, name, map_y):
@@ -507,6 +612,19 @@ class Level(tool.State):
         return False
 
     def checkGameState(self):
+        # 疯狂模式：时间到则游戏结束，跳转到报告页面
+        if self.is_crazy_mode:
+            remaining_time = self.checkCrazyModeTime()
+            if remaining_time is not None and remaining_time <= 0:
+                # 保存游戏数据到 game_info
+                self.game_info['final_score'] = self.score
+                self.game_info['game_duration'] = self.game_duration
+                self.game_info['zombies_killed'] = self.zombies_killed.copy()
+                self.next = c.GAME_REPORT
+                self.done = True
+                return
+
+        # 普通模式：检查胜利和失败
         if self.checkVictory():
             self.game_info[c.LEVEL_NUM] += 1
             self.next = c.GAME_VICTORY
@@ -514,6 +632,38 @@ class Level(tool.State):
         elif self.checkLose():
             self.next = c.GAME_LOSE
             self.done = True
+
+    def addScore(self, zombie_name):
+        """添加分数并更新击杀统计"""
+        score_value = c.ZOMBIE_SCORES.get(zombie_name, 0)
+        self.score += score_value
+        if zombie_name in self.zombies_killed:
+            self.zombies_killed[zombie_name] += 1
+
+    def checkZombieKills(self):
+        """检查僵尸击杀并计分"""
+        for i in range(self.map_y_len):
+            for zombie in self.zombie_groups[i]:
+                # 当僵尸进入死亡状态且未计分时
+                if zombie.state == c.DIE and not zombie.scored:
+                    self.addScore(zombie.name)
+                    zombie.scored = True
+
+    def checkCrazyModeTime(self):
+        """
+        检查疯狂模式倒计时
+        Returns:
+            int: 剩余时间（毫秒），如果不是疯狂模式返回 None
+        """
+        if not self.is_crazy_mode:
+            return None
+
+        if self.crazy_start_time == 0:
+            return self.game_duration
+
+        elapsed = self.current_time - self.crazy_start_time
+        remaining = self.game_duration - elapsed
+        return max(0, remaining)
 
     def drawMouseShow(self, surface):
         if self.hint_plant:
@@ -534,6 +684,14 @@ class Level(tool.State):
             self.panel.draw(surface)
         elif self.state == c.PLAY:
             self.menubar.draw(surface)
+
+            # 疯狂模式显示分数、倒计时和击杀数
+            if self.is_crazy_mode:
+                self.menubar.drawScore(surface, self.score)
+                remaining_time = self.checkCrazyModeTime()
+                self.menubar.drawTimer(surface, remaining_time)
+                self.menubar.drawKills(surface, self.zombies_killed)
+
             for i in range(self.map_y_len):
                 self.plant_groups[i].draw(surface)
                 self.zombie_groups[i].draw(surface)

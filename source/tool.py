@@ -39,6 +39,7 @@ class Control():
         self.state_dict = {}
         self.state_name = None
         self.state = None
+        self.events = []  # 存储当前帧的所有事件
         self.game_info = {c.CURRENT_TIME:0.0,
                           c.LEVEL_NUM:c.START_LEVEL_NUM}
  
@@ -52,10 +53,11 @@ class Control():
         self.current_time = pg.time.get_ticks()
         if self.state.done:
             self.flip_state()
-        self.state.update(self.screen, self.current_time, self.mouse_pos, self.mouse_click)
+        self.state.update(self.screen, self.current_time, self.mouse_pos, self.mouse_click, self.events)
         self.mouse_pos = None
         self.mouse_click[0] = False
         self.mouse_click[1] = False
+        self.events = []  # 清空事件列表
 
     def flip_state(self):
         previous, self.state_name = self.state_name, self.state.next
@@ -64,7 +66,8 @@ class Control():
         self.state.startup(self.current_time, persist)
 
     def event_loop(self):
-        for event in pg.event.get():
+        self.events = pg.event.get()  # 获取所有事件
+        for event in self.events:
             if event.type == pg.QUIT:
                 self.done = True
             elif event.type == pg.KEYDOWN:
@@ -166,6 +169,52 @@ def loadPlantImageRect():
     data = json.load(f)
     f.close()
     return data[c.PLANT_IMAGE_RECT]
+
+def renderText(text, font_size, color, bg_color=None):
+    """渲染文字，返回 Surface 对象"""
+    font = pg.font.SysFont('Arial', font_size)
+    if bg_color:
+        text_surface = font.render(text, True, color, bg_color)
+    else:
+        text_surface = font.render(text, True, color)
+    return text_surface
+
+def renderInputBox(surface, rect, text, active, font_size=24):
+    """渲染输入框
+    Args:
+        surface: 渲染目标 Surface
+        rect: 输入框位置和大小 (x, y, width, height)
+        text: 输入框文本
+        active: 是否激活（激活时边框高亮）
+        font_size: 字体大小
+    """
+    box_rect = pg.Rect(rect)
+    # 绘制边框
+    border_color = c.GOLD if active else c.WHITE
+    pg.draw.rect(surface, border_color, box_rect, 2)
+    # 绘制背景
+    bg_rect = pg.Rect(rect[0] + 2, rect[1] + 2, rect[2] - 4, rect[3] - 4)
+    pg.draw.rect(surface, c.BLACK, bg_rect)
+    # 渲染文字
+    if text:
+        font = pg.font.SysFont('Arial', font_size)
+        text_surface = font.render(text, True, c.WHITE)
+        surface.blit(text_surface, (rect[0] + 10, rect[1] + (rect[3] - text_surface.get_height()) // 2))
+
+def fadeInText(surface, text, alpha, pos, font_size=30, color=c.WHITE):
+    """渲染渐入文字效果
+    Args:
+        surface: 渲染目标 Surface
+        text: 文字内容
+        alpha: 透明度 (0-255)
+        pos: 文字位置 (x, y)
+        font_size: 字体大小
+        color: 文字颜色
+    """
+    font = pg.font.SysFont('Arial', font_size)
+    text_surface = font.render(text, True, color)
+    text_surface.set_alpha(alpha)
+    surface.blit(text_surface, pos)
 
 pg.init()
 pg.display.set_caption(c.ORIGINAL_CAPTION)

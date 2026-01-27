@@ -1,0 +1,152 @@
+__author__ = 'marble_xu'
+
+from . import constants as c
+
+
+class LanguageManager:
+    """多语言管理器，支持中英文切换"""
+
+    def __init__(self, default_language=c.LANGUAGE_ZH_CN):
+        self.current_language = default_language
+        self.translations = {}
+        self._load_translations()
+
+    def _load_translations(self):
+        """加载所有语言翻译"""
+        self.translations[c.LANGUAGE_ZH_CN] = self._load_chinese()
+        self.translations[c.LANGUAGE_EN_US] = self._load_english()
+
+    def _load_chinese(self):
+        """中文翻译"""
+        return {
+            # Loading Screen
+            'loading_story_1': '在数字世界的深处，安全产品如同坚固的城墙守护着客户的数字资产...',
+            'loading_story_2': '每一次攻击的防御，都是技术与智慧的较量...',
+            'loading_story_3': '我们用代码编织防护网，用算法构筑安全屏障...',
+            'loading_story_4': '守护客户的信任，是我们永恒的使命！',
+
+            # Login Screen
+            'login_title': '欢迎来到植物大战僵尸疯狂模式',
+            'login_name': '姓名：',
+            'login_employee_id': '工号：',
+            'login_button': '开始游戏',
+            'login_language': '语言',
+            'login_offline_mode': '离线模式',
+            'login_connecting': '正在连接服务器...',
+            'login_error': '登录失败：',
+            'login_name_empty': '请输入姓名',
+            'login_id_empty': '请输入工号',
+
+            # Main Menu
+            'menu_adventure': '开始冒险',
+            'menu_crazy_mode': '疯狂模式',
+
+            # Game UI
+            'game_score': '分数：',
+            'game_time': '时间：',
+            'game_kills': '击杀：',
+            'game_sun': '阳光：',
+
+            # Game Report
+            'report_title': '游戏报告',
+            'report_final_score': '最终分数：',
+            'report_rank': '排名：',
+            'report_duration': '游戏时长：',
+            'report_kills_title': '击杀统计',
+            'report_leaderboard': '排行榜',
+            'report_export': '导出截图',
+            'report_play_again': '再来一局',
+            'report_exit': '退出游戏',
+            'report_offline': '离线模式（无排名）',
+            'report_rank_format': '第 {} 名',
+            'report_no_rank': '未上榜',
+
+            # Zombie Names
+            'zombie_normal': '普通僵尸',
+            'zombie_conehead': '锥形头僵尸',
+            'zombie_buckethead': '桶形头僵尸',
+            'zombie_flag': '旗帜僵尸',
+            'zombie_newspaper': '报纸僵尸',
+
+            # Common
+            'seconds': '秒',
+            'points': '分',
+            'loading': '加载中...',
+        }
+
+    def _load_english(self):
+        """英文翻译"""
+        return {
+            # Loading Screen
+            'loading_story_1': 'In the depths of the digital world, security products stand as fortresses protecting customer assets...',
+            'loading_story_2': 'Every defense against attacks is a battle of technology and wisdom...',
+            'loading_story_3': 'We weave protection with code and build security barriers with algorithms...',
+            'loading_story_4': 'Protecting customer trust is our eternal mission!',
+
+            # Login Screen
+            'login_title': 'Welcome to Plants vs Zombies Crazy Mode',
+            'login_name': 'Name:',
+            'login_employee_id': 'Employee ID:',
+            'login_button': 'Start Game',
+            'login_language': 'Language',
+            'login_offline_mode': 'Offline Mode',
+            'login_connecting': 'Connecting to server...',
+            'login_error': 'Login failed: ',
+            'login_name_empty': 'Please enter your name',
+            'login_id_empty': 'Please enter your employee ID',
+
+            # Main Menu
+            'menu_adventure': 'Adventure',
+            'menu_crazy_mode': 'Crazy Mode',
+
+            # Game UI
+            'game_score': 'Score: ',
+            'game_time': 'Time: ',
+            'game_kills': 'Kills: ',
+            'game_sun': 'Sun: ',
+
+            # Game Report
+            'report_title': 'Game Report',
+            'report_final_score': 'Final Score: ',
+            'report_rank': 'Rank: ',
+            'report_duration': 'Duration: ',
+            'report_kills_title': 'Kill Statistics',
+            'report_leaderboard': 'Leaderboard',
+            'report_export': 'Export Screenshot',
+            'report_play_again': 'Play Again',
+            'report_exit': 'Exit Game',
+            'report_offline': 'Offline Mode (No Ranking)',
+            'report_rank_format': 'Rank #{}',
+            'report_no_rank': 'Not Ranked',
+
+            # Zombie Names
+            'zombie_normal': 'Normal Zombie',
+            'zombie_conehead': 'Conehead Zombie',
+            'zombie_buckethead': 'Buckethead Zombie',
+            'zombie_flag': 'Flag Zombie',
+            'zombie_newspaper': 'Newspaper Zombie',
+
+            # Common
+            'seconds': 's',
+            'points': 'pts',
+            'loading': 'Loading...',
+        }
+
+    def get(self, key, default=''):
+        """获取翻译文本"""
+        return self.translations.get(self.current_language, {}).get(key, default)
+
+    def set_language(self, language):
+        """切换语言"""
+        if language in self.translations:
+            self.current_language = language
+            return True
+        return False
+
+    def get_current_language(self):
+        """获取当前语言"""
+        return self.current_language
+
+
+# 创建全局语言管理器实例
+LANG = LanguageManager()
