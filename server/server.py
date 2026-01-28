@@ -42,15 +42,16 @@ def main():
     print(f'Access the server at {url}')
     print('Press Ctrl+C to stop the server')
 
-    # 延迟打开浏览器，确保服务器已启动
-    def open_browser():
-        print(f'Opening browser at {url}')
-        webbrowser.open(url)
+    # 只在非 reloader 主进程中打开浏览器（避免 debug 模式下打开多个标签页）
+    if not os.environ.get('WERKZEUG_RUN_MAIN'):
+        def open_browser():
+            print(f'Opening browser at {url}')
+            webbrowser.open(url)
 
-    # 使用定时器在1.5秒后打开浏览器
-    timer = threading.Timer(1.5, open_browser)
-    timer.daemon = True
-    timer.start()
+        # 使用定时器在1.5秒后打开浏览器
+        timer = threading.Timer(1.5, open_browser)
+        timer.daemon = True
+        timer.start()
 
     app.run(
         host=config.HOST,
