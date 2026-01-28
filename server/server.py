@@ -3,6 +3,8 @@ Flask 服务器主程序
 """
 
 import os
+import webbrowser
+import threading
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 from .api import api
@@ -33,9 +35,22 @@ def main():
     """启动服务器"""
     app = create_app()
 
+    # 构造访问地址
+    url = f'http://localhost:{config.PORT}'
+
     print(f'Starting server on {config.HOST}:{config.PORT}')
-    print(f'Access the server at http://{config.HOST}:{config.PORT}')
+    print(f'Access the server at {url}')
     print('Press Ctrl+C to stop the server')
+
+    # 延迟打开浏览器，确保服务器已启动
+    def open_browser():
+        print(f'Opening browser at {url}')
+        webbrowser.open(url)
+
+    # 使用定时器在1.5秒后打开浏览器
+    timer = threading.Timer(1.5, open_browser)
+    timer.daemon = True
+    timer.start()
 
     app.run(
         host=config.HOST,
