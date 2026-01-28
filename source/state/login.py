@@ -27,7 +27,7 @@ class LoginScreen(tool.State):
         # 按钮位置
         self.login_button_rect = pg.Rect(300, 400, 200, 50)
         self.settings_button_rect = pg.Rect(550, 50, 100, 40)
-        self.language_button_rect = pg.Rect(660, 50, 100, 40)
+        self.language_button_rect = pg.Rect(670, 50, 100, 40)
 
         # 设置弹窗状态
         self.show_settings = False
@@ -337,7 +337,7 @@ class LoginScreen(tool.State):
         lang_button_color = (120, 100, 150)
         pg.draw.rect(surface, lang_button_color, self.language_button_rect)
         pg.draw.rect(surface, c.WHITE, self.language_button_rect, 2)
-        lang_text = label_font.render(LANG.get('login_language'), True, c.WHITE)
+        lang_text = label_font.render(LANG.get('login_switch_language'), True, c.WHITE)
         lang_text_rect = lang_text.get_rect()
         lang_text_rect.center = self.language_button_rect.center
         surface.blit(lang_text, lang_text_rect)

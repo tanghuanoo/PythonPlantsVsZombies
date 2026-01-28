@@ -213,7 +213,33 @@ class MenuBar():
         """绘制分数显示"""
         font = pg.font.SysFont('Arial', 24)
         score_text = font.render(f'Score: {score}', True, c.GOLD)
-        surface.blit(score_text, (550, 10))
+
+        # 计算文本矩形
+        text_rect = score_text.get_rect()
+        text_rect.x = 550
+        text_rect.y = 10
+
+        # 绘制半透明背景
+        padding_x = 10
+        padding_y = 5
+        bg_rect = pg.Rect(
+            text_rect.x - padding_x,
+            text_rect.y - padding_y,
+            text_rect.width + padding_x * 2,
+            text_rect.height + padding_y * 2
+        )
+
+        # 创建半透明表面
+        bg_surface = pg.Surface((bg_rect.width, bg_rect.height))
+        bg_surface.set_alpha(200)
+        bg_surface.fill((0, 0, 0))
+        surface.blit(bg_surface, (bg_rect.x, bg_rect.y))
+
+        # 绘制边框
+        pg.draw.rect(surface, c.GOLD, bg_rect, 1, border_radius=5)
+
+        # 绘制文本
+        surface.blit(score_text, (text_rect.x, text_rect.y))
 
     def drawTimer(self, surface, remaining_time):
         """绘制倒计时
@@ -231,7 +257,32 @@ class MenuBar():
 
         font = pg.font.SysFont('Arial', 24)
         time_text = font.render(f'Time: {minutes:02d}:{seconds:02d}', True, c.WHITE)
-        surface.blit(time_text, (550, 40))
+
+        # 计算文本矩形
+        text_rect = time_text.get_rect()
+        text_rect.x = 550
+        text_rect.y = 40
+
+        # 绘制半透明背景
+        padding_x = 10
+        padding_y = 5
+        bg_rect = pg.Rect(
+            text_rect.x - padding_x,
+            text_rect.y - padding_y,
+            text_rect.width + padding_x * 2,
+            text_rect.height + padding_y * 2
+        )
+
+        bg_surface = pg.Surface((bg_rect.width, bg_rect.height))
+        bg_surface.set_alpha(200)
+        bg_surface.fill((0, 0, 0))
+        surface.blit(bg_surface, (bg_rect.x, bg_rect.y))
+
+        # 绘制边框
+        pg.draw.rect(surface, c.WHITE, bg_rect, 1, border_radius=5)
+
+        # 绘制文本
+        surface.blit(time_text, (text_rect.x, text_rect.y))
 
     def drawKills(self, surface, kills):
         """绘制总击杀数
@@ -242,7 +293,32 @@ class MenuBar():
         total_kills = sum(kills.values())
         font = pg.font.SysFont('Arial', 24)
         kills_text = font.render(f'Kills: {total_kills}', True, c.WHITE)
-        surface.blit(kills_text, (550, 70))
+
+        # 计算文本矩形
+        text_rect = kills_text.get_rect()
+        text_rect.x = 550
+        text_rect.y = 70
+
+        # 绘制半透明背景
+        padding_x = 10
+        padding_y = 5
+        bg_rect = pg.Rect(
+            text_rect.x - padding_x,
+            text_rect.y - padding_y,
+            text_rect.width + padding_x * 2,
+            text_rect.height + padding_y * 2
+        )
+
+        bg_surface = pg.Surface((bg_rect.width, bg_rect.height))
+        bg_surface.set_alpha(200)
+        bg_surface.fill((0, 0, 0))
+        surface.blit(bg_surface, (bg_rect.x, bg_rect.y))
+
+        # 绘制边框
+        pg.draw.rect(surface, c.WHITE, bg_rect, 1, border_radius=5)
+
+        # 绘制文本
+        surface.blit(kills_text, (text_rect.x, text_rect.y))
 
     def draw(self, surface):
         self.drawSunValue()
