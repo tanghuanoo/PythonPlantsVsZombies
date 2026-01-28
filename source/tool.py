@@ -106,6 +106,48 @@ def get_image(sheet, x, y, width, height, colorkey=c.BLACK, scale=1):
                                     int(rect.height*scale)))
         return image
 
+def get_image_fit(sheet, x, y, width, height, colorkey=c.BLACK, target_width=None, target_height=None, keep_ratio=True):
+    """根据目标尺寸缩放图片，适用于高清图片自适应显示
+
+    Args:
+        sheet: 源图像 Surface
+        x, y: 源图像裁剪起始坐标
+        width, height: 源图像裁剪尺寸
+        colorkey: 透明色
+        target_width: 目标宽度
+        target_height: 目标高度
+        keep_ratio: 是否保持宽高比（默认 True）
+
+    Returns:
+        缩放后的 Surface
+    """
+    image = pg.Surface([width, height])
+    image.blit(sheet, (0, 0), (x, y, width, height))
+    image.set_colorkey(colorkey)
+
+    if target_width is None and target_height is None:
+        return image
+
+    if keep_ratio:
+        # 计算缩放比例，取较小值以保证图片完全适配
+        scale_x = target_width / width if target_width else float('inf')
+        scale_y = target_height / height if target_height else float('inf')
+        scale = min(scale_x, scale_y)
+        new_width = int(width * scale)
+        new_height = int(height * scale)
+    else:
+        new_width = target_width if target_width else width
+        new_height = target_height if target_height else height
+
+    # 计算缩放倍数，超过 2 倍使用 smoothscale 获得更好质量
+    scale_factor = max(width / new_width, height / new_height)
+    if scale_factor > 2:
+        image = pg.transform.smoothscale(image, (new_width, new_height))
+    else:
+        image = pg.transform.scale(image, (new_width, new_height))
+
+    return image
+
 def load_image_frames(directory, image_name, colorkey, accept):
     frame_list = []
     tmp = {}

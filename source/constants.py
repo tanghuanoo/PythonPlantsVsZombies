@@ -75,6 +75,14 @@ CARD_POOL = 'card_pool'
 MOVEBAR_CARD_FRESH_TIME = 6000
 CARD_MOVE_TIME = 60
 
+# 标准卡片参考尺寸（用于计算 HD 图片的缩放目标）
+CARD_REF_WIDTH = 64
+CARD_REF_HEIGHT = 90
+
+# 高清图片判断阈值（超过此尺寸认为是高清）
+HD_CARD_WIDTH_THRESHOLD = 128   # 64 * 2
+HD_CARD_HEIGHT_THRESHOLD = 178  # 90 * 2
+
 #PLANT INFO
 PLANT_IMAGE_RECT = 'plant_image_rect'
 CAR = 'car'

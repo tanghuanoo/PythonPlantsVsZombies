@@ -70,7 +70,23 @@ class Card():
         rect = frame.get_rect()
         width, height = rect.w, rect.h
 
-        self.orig_image = tool.get_image(frame, 0, 0, width, height, c.BLACK, scale)
+        # 判断是否为高清图片（尺寸超过阈值）
+        is_hd = width > c.HD_CARD_WIDTH_THRESHOLD or height > c.HD_CARD_HEIGHT_THRESHOLD
+
+        if is_hd:
+            # 高清图片：根据 scale 和标准参考尺寸动态计算目标，保持比例
+            target_w = int(c.CARD_REF_WIDTH * scale)
+            target_h = int(c.CARD_REF_HEIGHT * scale)
+            self.orig_image = tool.get_image_fit(
+                frame, 0, 0, width, height, c.BLACK,
+                target_width=target_w,
+                target_height=target_h,
+                keep_ratio=True
+            )
+        else:
+            # 低分辨率图片：保持原有比例缩放（向后兼容）
+            self.orig_image = tool.get_image(frame, 0, 0, width, height, c.BLACK, scale)
+
         self.image = self.orig_image
 
     def checkMouseClick(self, mouse_pos):
@@ -457,7 +473,23 @@ class MoveCard():
         rect = frame.get_rect()
         width, height = rect.w, rect.h
 
-        self.orig_image = tool.get_image(frame, 0, 0, width, height, c.BLACK, scale)
+        # 判断是否为高清图片（尺寸超过阈值）
+        is_hd = width > c.HD_CARD_WIDTH_THRESHOLD or height > c.HD_CARD_HEIGHT_THRESHOLD
+
+        if is_hd:
+            # 高清图片：根据 scale 和标准参考尺寸动态计算目标，保持比例
+            target_w = int(c.CARD_REF_WIDTH * scale)
+            target_h = int(c.CARD_REF_HEIGHT * scale)
+            self.orig_image = tool.get_image_fit(
+                frame, 0, 0, width, height, c.BLACK,
+                target_width=target_w,
+                target_height=target_h,
+                keep_ratio=True
+            )
+        else:
+            # 低分辨率图片：保持原有比例缩放（向后兼容）
+            self.orig_image = tool.get_image(frame, 0, 0, width, height, c.BLACK, scale)
+
         self.orig_rect = self.orig_image.get_rect()
         self.image = self.orig_image
 
