@@ -116,8 +116,9 @@ class LoadingScreen(tool.State):
             LANG.set_language(original_lang)
 
             # 文本自动换行处理
-            zh_font = pg.font.SysFont('SimHei', 24)  # 中文字体稍大
-            en_font = pg.font.SysFont('Arial', 18)   # 英文字体稍小
+            # 使用更清晰美观的字体：微软雅黑（中文）和 Segoe UI（英文）
+            zh_font = pg.font.SysFont('Microsoft YaHei', 28, bold=True)  # 中文使用微软雅黑，加粗
+            en_font = pg.font.SysFont('Segoe UI', 20, italic=True)  # 英文使用 Segoe UI 斜体
             max_width = c.SCREEN_WIDTH - 100  # 左右各留50像素边距
 
             # 将文本分割成多行
@@ -125,9 +126,9 @@ class LoadingScreen(tool.State):
             en_lines = self.wrap_text(en_text, en_font, max_width)
 
             # 计算总高度
-            zh_line_height = zh_font.get_linesize()
-            en_line_height = en_font.get_linesize()
-            spacing = 10  # 中英文之间的间距
+            zh_line_height = int(zh_font.get_linesize() * 1.3)  # 增加行间距
+            en_line_height = int(en_font.get_linesize() * 1.2)  # 增加行间距
+            spacing = 20  # 中英文之间的间距增大
             total_height = (zh_line_height * len(zh_lines) +
                           spacing +
                           en_line_height * len(en_lines))
@@ -149,9 +150,9 @@ class LoadingScreen(tool.State):
             # 添加间距
             y_offset += spacing
 
-            # 绘制英文文字（灰色）
+            # 绘制英文文字（浅灰色斜体，与中文形成层次）
             for i, line in enumerate(en_lines):
-                text_surface = en_font.render(line, True, (180, 180, 180))
+                text_surface = en_font.render(line, True, (200, 200, 210))
                 text_surface.set_alpha(self.alpha)
                 text_rect = text_surface.get_rect()
                 text_rect.centerx = c.SCREEN_WIDTH // 2
