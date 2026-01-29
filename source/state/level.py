@@ -719,3 +719,6 @@ class Level(tool.State):
 
             if self.drag_plant:
                 self.drawMouseShow(surface)
+
+            # 最后绘制 tooltip，确保显示在最上层
+            self.menubar.drawTooltip(surface)

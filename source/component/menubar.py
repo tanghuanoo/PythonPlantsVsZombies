@@ -408,6 +408,9 @@ class MenuBar():
         surface.blit(self.image, self.rect)
         for card in self.card_list:
             card.draw(surface)
+
+    def drawTooltip(self, surface):
+        """单独绘制 tooltip，确保显示在最上层"""
         self.tooltip.draw(surface)
 
 class Panel():
