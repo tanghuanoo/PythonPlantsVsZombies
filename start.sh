@@ -57,12 +57,25 @@ if ! command -v python &> /dev/null && ! command -v python3 &> /dev/null; then
 fi
 
 # 使用 python3 或 python
-if command -v python3 &> /dev/null; then
-    PYTHON=python3
-    PIP=pip3
+# Windows 上 python3 可能是 Store 占位符，需要验证是否真正可用
+if [ "$OS" = "Windows" ]; then
+    # Windows 优先使用 python
+    if command -v python &> /dev/null && python --version &> /dev/null; then
+        PYTHON=python
+        PIP=pip
+    elif command -v python3 &> /dev/null && python3 --version &> /dev/null; then
+        PYTHON=python3
+        PIP=pip3
+    fi
 else
-    PYTHON=python
-    PIP=pip
+    # Linux/Mac 优先使用 python3
+    if command -v python3 &> /dev/null; then
+        PYTHON=python3
+        PIP=pip3
+    else
+        PYTHON=python
+        PIP=pip
+    fi
 fi
 
 echo -e "${GREEN}[✓]${NC} Python 环境已就绪"
@@ -119,7 +132,12 @@ case $choice in
         echo ""
 
         # 启动游戏
-        $PYTHON start_game.py
+        if [ "$OS" = "Windows" ]; then
+            # Windows Git Bash 中需要使用 cmd 来正确运行 GUI 程序
+            cmd //c "$PYTHON start_game.py"
+        else
+            $PYTHON start_game.py
+        fi
 
         # 游戏结束后停止服务器
         echo ""
@@ -144,7 +162,11 @@ case $choice in
         echo "   正在启动离线模式..."
         echo "═══════════════════════════════════════════════════"
         echo ""
-        $PYTHON main.py
+        if [ "$OS" = "Windows" ]; then
+            cmd //c "$PYTHON main.py"
+        else
+            $PYTHON main.py
+        fi
         ;;
     3)
         echo ""
