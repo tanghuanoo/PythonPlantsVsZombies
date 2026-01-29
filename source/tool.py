@@ -286,6 +286,10 @@ def fadeInText(surface, text, alpha, pos, font_size=30, color=c.WHITE):
 pg.init()
 pg.display.set_caption(c.ORIGINAL_CAPTION)
 SCREEN = pg.display.set_mode(c.SCREEN_SIZE, pg.RESIZABLE | pg.SCALED)
+# 启用按键重复：首次延迟500ms，之后每50ms重复（用于长按backspace等）
+pg.key.set_repeat(500, 50)
+# 初始化剪贴板模块（用于粘贴功能）
+pg.scrap.init()
 
 GFX = load_all_gfx(os.path.join("resources","graphics"))
 ORIGIN_GFX = load_all_gfx(os.path.join("resources","origin_graphics"))

@@ -124,6 +124,9 @@ class LoginScreen(tool.State):
                         self.name_text = self.name_text[:-1]
                     else:
                         self.employee_id_text = self.employee_id_text[:-1]
+                elif event.key == pg.K_v and (event.mod & pg.KMOD_CTRL):
+                    # Ctrl+V 粘贴
+                    self.handle_paste()
             elif event.type == pg.TEXTINPUT:
                 # 使用 TEXTINPUT 事件处理文本输入（支持中文 IME）
                 if self.show_settings:
@@ -132,6 +135,24 @@ class LoginScreen(tool.State):
                     self.name_text += event.text
                 else:
                     self.employee_id_text += event.text
+
+    def handle_paste(self):
+        """处理粘贴操作"""
+        try:
+            # 获取剪贴板文本
+            clipboard_text = pg.scrap.get(pg.SCRAP_TEXT)
+            if clipboard_text:
+                # 解码并清理文本（移除空字符）
+                text = clipboard_text.decode('utf-8', errors='ignore').rstrip('\x00')
+                if text:
+                    if self.show_settings:
+                        self.settings_server_url += text
+                    elif self.active_input == 'name':
+                        self.name_text += text
+                    else:
+                        self.employee_id_text += text
+        except Exception as e:
+            print(f'Paste failed: {e}')
 
     def handle_mouse_click(self, mouse_pos):
         """处理鼠标点击"""
