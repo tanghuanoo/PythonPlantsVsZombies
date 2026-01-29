@@ -548,10 +548,8 @@ class Squash(Plant):
         name_list = [idle_name, aim_name, attack_name]
 
         for i, name in enumerate(name_list):
-            if name == idle_name:
-                self.loadFrames(frame_list[i], name, 1)  # idle 用黑色（透明背景）
-            else:
-                self.loadFrames(frame_list[i], name, 1, c.WHITE)  # aim 和 attack 用白色
+            self.loadFrames(frame_list[i], name, 0.75)  # idle 用黑色（透明背景）
+
 
         self.frames = self.idle_frames
 

@@ -413,7 +413,14 @@ class Level(tool.State):
             color = c.WHITE
         else:
             color = c.BLACK
-        self.mouse_image = tool.get_image(frame_list[0], x, y, width, height, color, 1)
+
+        # 为倭瓜设置缩放比例
+        if plant_name == c.SQUASH:
+            scale = 0.75
+        else:
+            scale = 1
+
+        self.mouse_image = tool.get_image(frame_list[0], x, y, width, height, color, scale)
         self.mouse_rect = self.mouse_image.get_rect()
         pg.mouse.set_visible(False)
         self.drag_plant = True
