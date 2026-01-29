@@ -15,7 +15,9 @@ RUN groupadd --gid 1000 appgroup && \
     useradd --uid 1000 --gid appgroup --shell /bin/bash --create-home appuser
 
 COPY server/requirements.txt ./server/
-RUN pip install --no-cache-dir -r server/requirements.txt
+RUN pip install --no-cache-dir -r server/requirements.txt \
+    -i http://mirrors.sangfor.com/pypi/simple/ \
+    --trusted-host mirrors.sangfor.com
 
 COPY server/ ./server/
 COPY start_server.py .

@@ -15,8 +15,11 @@ services:
       - FLASK_DEBUG=${FLASK_DEBUG:-false}
       - DATABASE_PATH=/app/data/game.db
     volumes:
-      - ./docker-data:/app/data
+      - pvz-data:/app/data
     restart: unless-stopped
+
+volumes:
+  pvz-data:
     logging:
       driver: "json-file"
       options:
