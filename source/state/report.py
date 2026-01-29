@@ -83,7 +83,7 @@ class GameReportScreen(tool.State):
         # 再来一局
         if self.play_again_button_rect.collidepoint(mouse_pos):
             self.done = True
-            self.next = c.LEVEL
+            self.next = c.LOGIN_SCREEN
 
         # 退出游戏
         if self.exit_button_rect.collidepoint(mouse_pos):

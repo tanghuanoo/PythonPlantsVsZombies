@@ -41,19 +41,19 @@ class Screen(tool.State):
 class GameVictoryScreen(Screen):
     def __init__(self):
         Screen.__init__(self)
-    
+
     def getImageName(self):
         return c.GAME_VICTORY_IMAGE
-    
+
     def set_next_state(self):
-        return c.LEVEL
+        return c.LOGIN_SCREEN
 
 class GameLoseScreen(Screen):
     def __init__(self):
         Screen.__init__(self)
-    
+
     def getImageName(self):
         return c.GAME_LOOSE_IMAGE
-    
+
     def set_next_state(self):
-        return c.MAIN_MENU
+        return c.LOGIN_SCREEN

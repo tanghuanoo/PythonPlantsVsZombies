@@ -302,7 +302,7 @@ class LoginScreen(tool.State):
         # 绘制姓名标签
         label_font = pg.font.SysFont('SimHei', 24)
         name_label = label_font.render(LANG.get('login_name'), True, c.WHITE)
-        surface.blit(name_label, (150, 260))
+        surface.blit(name_label, (100, 260))
 
         # 绘制姓名输入框
         tool.renderInputBox(surface, self.name_input_rect, self.name_text,
@@ -310,7 +310,7 @@ class LoginScreen(tool.State):
 
         # 绘制工号标签
         id_label = label_font.render(LANG.get('login_employee_id'), True, c.WHITE)
-        surface.blit(id_label, (150, 330))
+        surface.blit(id_label, (100, 330))
 
         # 绘制工号输入框
         tool.renderInputBox(surface, self.id_input_rect, self.employee_id_text,
