@@ -704,12 +704,11 @@ class Level(tool.State):
         elif self.state == c.PLAY:
             self.menubar.draw(surface)
 
-            # 疯狂模式显示分数、倒计时和击杀数
+            # 疯狂模式显示分数和倒计时（横向排列在右上角）
             if self.is_crazy_mode:
-                self.menubar.drawScore(surface, self.score)
+                score_left_x = self.menubar.drawScore(surface, self.score)
                 remaining_time = self.checkCrazyModeTime()
-                self.menubar.drawTimer(surface, remaining_time)
-                self.menubar.drawKills(surface, self.zombies_killed)
+                self.menubar.drawTimer(surface, remaining_time, score_left_x)
 
             for i in range(self.map_y_len):
                 self.plant_groups[i].draw(surface)

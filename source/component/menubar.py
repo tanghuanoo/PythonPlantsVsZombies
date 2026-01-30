@@ -293,11 +293,11 @@ class MenuBar():
         self.image.blit(self.value_image, self.value_rect)
 
     def drawScore(self, surface, score):
-        """绘制分数显示"""
+        """绘制分数显示（右上角最右边）"""
         font = pg.font.SysFont('Arial', 24)
         score_text = font.render(f'Score: {score}', True, c.GOLD)
 
-        # 计算文本矩形，放置在右上角
+        # 计算文本矩形，放置在右上角最右边
         text_rect = score_text.get_rect()
         padding_x = 10
         padding_y = 5
@@ -324,11 +324,15 @@ class MenuBar():
         # 绘制文本
         surface.blit(score_text, (text_rect.x, text_rect.y))
 
-    def drawTimer(self, surface, remaining_time):
-        """绘制倒计时
+        # 返回背景矩形左边界，供 Timer 定位使用
+        return bg_rect.x
+
+    def drawTimer(self, surface, remaining_time, score_left_x=None):
+        """绘制倒计时（在 Score 左边横向排列）
         Args:
             surface: 绘制表面
             remaining_time: 剩余时间（毫秒）
+            score_left_x: Score 面板的左边界 x 坐标
         """
         if remaining_time is None:
             return
@@ -341,12 +345,16 @@ class MenuBar():
         font = pg.font.SysFont('Arial', 24)
         time_text = font.render(f'Time: {minutes:02d}:{seconds:02d}', True, c.WHITE)
 
-        # 计算文本矩形，放置在右上角
+        # 计算文本矩形，放置在 Score 左边
         text_rect = time_text.get_rect()
         padding_x = 10
         padding_y = 5
-        text_rect.right = c.SCREEN_WIDTH - padding_x - 5
-        text_rect.y = 45
+
+        if score_left_x is not None:
+            text_rect.right = score_left_x - 10  # 在 Score 左边，间隔 10 像素
+        else:
+            text_rect.right = c.SCREEN_WIDTH - padding_x - 5
+        text_rect.y = 10  # 与 Score 同一行
 
         # 绘制半透明背景
         bg_rect = pg.Rect(
