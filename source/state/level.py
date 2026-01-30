@@ -146,7 +146,7 @@ class Level(tool.State):
         # 检测 ESC 键，重新开始游戏
         for event in events:
             if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
-                if self.drag_plant:
+                if getattr(self, 'drag_plant', False):
                     self.removeMouseImage()
                 self.next = c.LOGIN_SCREEN
                 self.done = True

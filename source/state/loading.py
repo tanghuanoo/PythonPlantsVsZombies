@@ -194,13 +194,62 @@ class LoadingScreen(tool.State):
                     # 未显示的故事用灰色空心圆
                     pg.draw.circle(surface, c.WHITE, (dot_x, dot_y), 8, 2)
 
-            # 绘制"点击跳过"提示
-            try:
-                skip_font = pg.font.SysFont('SimHei', 14)
-            except:
-                skip_font = pg.font.SysFont(None, 16)
-            skip_surface = skip_font.render('点击任意位置或按任意键跳过', True, (120, 120, 130))
-            skip_rect = skip_surface.get_rect()
-            skip_rect.centerx = c.SCREEN_WIDTH // 2
-            skip_rect.y = c.SCREEN_HEIGHT - 25
-            surface.blit(skip_surface, skip_rect)
+            # 绘制"点击跳过"提示 - 更显眼的样式
+            self.draw_skip_hint(surface)
+
+    def draw_skip_hint(self, surface):
+        """绘制跳过提示 - 更显眼的样式"""
+        skip_text = "Click to skip"
+
+        # 使用清晰的字体
+        skip_font = pg.font.SysFont('Arial', 18)
+
+        # 计算闪烁效果（使用正弦波实现平滑闪烁）
+        import math
+        pulse = (math.sin(self.current_time / 300) + 1) / 2  # 0 到 1 之间
+        alpha = int(150 + 105 * pulse)  # 150 到 255 之间
+
+        # 绘制半透明背景条
+        text_width = skip_font.size(skip_text)[0]
+        bg_rect = pg.Rect(0, c.SCREEN_HEIGHT - 40, c.SCREEN_WIDTH, 35)
+        bg_surface = pg.Surface((bg_rect.width, bg_rect.height))
+        bg_surface.fill((30, 30, 40))
+        bg_surface.set_alpha(180)
+        surface.blit(bg_surface, bg_rect)
+
+        # 绘制文字描边效果（让文字更清晰）
+        outline_color = (60, 60, 80)
+        text_color = (220, 220, 230)
+
+        # 绘制描边
+        for dx in [-1, 0, 1]:
+            for dy in [-1, 0, 1]:
+                if dx != 0 or dy != 0:
+                    outline_surface = skip_font.render(skip_text, True, outline_color)
+                    outline_surface.set_alpha(alpha)
+                    outline_rect = outline_surface.get_rect()
+                    outline_rect.centerx = c.SCREEN_WIDTH // 2 + dx
+                    outline_rect.centery = c.SCREEN_HEIGHT - 22 + dy
+                    surface.blit(outline_surface, outline_rect)
+
+        # 绘制主文字
+        skip_surface = skip_font.render(skip_text, True, text_color)
+        skip_surface.set_alpha(alpha)
+        skip_rect = skip_surface.get_rect()
+        skip_rect.centerx = c.SCREEN_WIDTH // 2
+        skip_rect.centery = c.SCREEN_HEIGHT - 22
+        surface.blit(skip_surface, skip_rect)
+
+        # 绘制两侧装饰线条
+        line_y = c.SCREEN_HEIGHT - 22
+        line_length = 60
+        gap = text_width // 2 + 20
+
+        # 左侧线条
+        pg.draw.line(surface, (100, 100, 120),
+                    (c.SCREEN_WIDTH // 2 - gap - line_length, line_y),
+                    (c.SCREEN_WIDTH // 2 - gap, line_y), 2)
+        # 右侧线条
+        pg.draw.line(surface, (100, 100, 120),
+                    (c.SCREEN_WIDTH // 2 + gap, line_y),
+                    (c.SCREEN_WIDTH // 2 + gap + line_length, line_y), 2)
