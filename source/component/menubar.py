@@ -11,6 +11,24 @@ PANEL_Y_INTERNAL = c.scale(74)
 PANEL_X_INTERNAL = c.scale(53)
 CARD_LIST_NUM = 8
 
+# 僵尸名称到行走动画帧的映射
+ZOMBIE_WALK_FRAMES = {
+    c.NORMAL_ZOMBIE: 'Zombie',
+    c.CONEHEAD_ZOMBIE: 'ConeheadZombie',
+    c.BUCKETHEAD_ZOMBIE: 'BucketheadZombie',
+    c.FLAG_ZOMBIE: 'FlagZombie',
+    c.NEWSPAPER_ZOMBIE: 'NewspaperZombie',
+}
+
+# 僵尸中文名称映射
+ZOMBIE_DISPLAY_NAMES = {
+    c.NORMAL_ZOMBIE: '普通僵尸',
+    c.CONEHEAD_ZOMBIE: '路障僵尸',
+    c.BUCKETHEAD_ZOMBIE: '铁桶僵尸',
+    c.FLAG_ZOMBIE: '旗帜僵尸',
+    c.NEWSPAPER_ZOMBIE: '报纸僵尸',
+}
+
 # 植物中文名称映射
 PLANT_DISPLAY_NAMES = {
     c.SUNFLOWER: '向日葵',
@@ -293,7 +311,10 @@ class MenuBar():
         self.image.blit(self.value_image, self.value_rect)
 
     def drawScore(self, surface, score):
-        """绘制分数显示（右上角最右边）"""
+        """绘制分数显示（右上角最右边）
+        Returns:
+            int: 面板底部 y 坐标，供 Timer 定位使用
+        """
         font = pg.font.SysFont('Arial', c.scale(24))
         score_text = font.render(f'Score: {score}', True, c.GOLD)
 
@@ -324,15 +345,16 @@ class MenuBar():
         # 绘制文本
         surface.blit(score_text, (text_rect.x, text_rect.y))
 
-        # 返回背景矩形左边界，供 Timer 定位使用
-        return bg_rect.x
+        # 返回背景矩形底部 y 坐标和右边界 x 坐标，供 Timer 定位使用
+        return bg_rect.bottom, bg_rect.right
 
-    def drawTimer(self, surface, remaining_time, score_left_x=None):
-        """绘制倒计时（在 Score 左边横向排列）
+    def drawTimer(self, surface, remaining_time, score_bottom_y=None, score_right_x=None):
+        """绘制倒计时（在 Score 下方纵向堆叠）
         Args:
             surface: 绘制表面
             remaining_time: 剩余时间（毫秒）
-            score_left_x: Score 面板的左边界 x 坐标
+            score_bottom_y: Score 面板的底部 y 坐标
+            score_right_x: Score 面板的右边界 x 坐标
         """
         if remaining_time is None:
             return
@@ -345,16 +367,29 @@ class MenuBar():
         font = pg.font.SysFont('Arial', c.scale(24))
         time_text = font.render(f'Time: {minutes:02d}:{seconds:02d}', True, c.WHITE)
 
-        # 计算文本矩形，放置在 Score 左边
+        # 计算文本矩形，放置在 Score 下方
         text_rect = time_text.get_rect()
         padding_x = c.scale(10)
         padding_y = c.scale(5)
 
-        if score_left_x is not None:
-            text_rect.right = score_left_x - c.scale(10)  # 在 Score 左边，间隔 10 像素
+        # 确保右对齐且不超出屏幕
+        if score_right_x is not None:
+            text_rect.right = min(score_right_x, c.SCREEN_WIDTH - c.scale(15))
         else:
             text_rect.right = c.SCREEN_WIDTH - padding_x - c.scale(5)
-        text_rect.y = c.scale(10)  # 与 Score 同一行
+
+        # 确保不超出左边界
+        if text_rect.x < c.scale(5):
+            text_rect.x = c.scale(5)
+
+        if score_bottom_y is not None:
+            text_rect.y = score_bottom_y + c.scale(5)
+        else:
+            text_rect.y = c.scale(10)
+
+        # 确保不超出下边界
+        if text_rect.y + text_rect.height > c.SCREEN_HEIGHT - c.scale(10):
+            text_rect.y = c.SCREEN_HEIGHT - c.scale(10) - text_rect.height
 
         # 绘制半透明背景
         bg_rect = pg.Rect(
@@ -411,6 +446,58 @@ class MenuBar():
         # 绘制文本
         surface.blit(kills_text, (text_rect.x, text_rect.y))
 
+    def drawProtectAI(self, surface, right_margin=None):
+        """绘制"保护AI"高清文字（无边框，纯描边效果）
+        Args:
+            surface: 绘制表面
+            right_margin: 右边界 x 坐标（如果有得分面板，传入其左边界）
+        """
+        try:
+            font = pg.font.SysFont('SimHei', c.scale(32), bold=True)
+        except:
+            font = pg.font.SysFont(None, c.scale(34))
+
+        text = '保护AI'
+
+        # 计算位置
+        text_surface = font.render(text, True, (255, 255, 255))
+        text_rect = text_surface.get_rect()
+
+        if right_margin is not None:
+            text_rect.right = right_margin - c.scale(20)
+        else:
+            text_rect.right = c.SCREEN_WIDTH - c.scale(25)
+        text_rect.y = c.scale(15)
+
+        # 绘制多层描边实现立体效果
+        # 外层阴影（深色）
+        shadow_color = (30, 20, 10)
+        shadow_offset = c.scale(3)
+        shadow_surface = font.render(text, True, shadow_color)
+        surface.blit(shadow_surface, (text_rect.x + shadow_offset, text_rect.y + shadow_offset))
+
+        # 描边层（深金色）
+        outline_color = (139, 90, 43)
+        outline_offset = c.scale(2)
+        for dx in [-outline_offset, 0, outline_offset]:
+            for dy in [-outline_offset, 0, outline_offset]:
+                if dx != 0 or dy != 0:
+                    outline_surface = font.render(text, True, outline_color)
+                    surface.blit(outline_surface, (text_rect.x + dx, text_rect.y + dy))
+
+        # 主文字（亮金色渐变效果）
+        main_color = (255, 215, 0)
+        main_surface = font.render(text, True, main_color)
+        surface.blit(main_surface, text_rect)
+
+        # 高光层（浅色，偏移-1像素）
+        highlight_color = (255, 245, 180)
+        highlight_surface = font.render(text, True, highlight_color)
+        highlight_surface.set_alpha(100)
+        surface.blit(highlight_surface, (text_rect.x - c.scale(1), text_rect.y - c.scale(1)))
+
+        return text_rect.x  # 返回左边界供其他元素定位
+
     def draw(self, surface):
         self.drawSunValue()
         surface.blit(self.image, self.rect)
@@ -422,7 +509,7 @@ class MenuBar():
         self.tooltip.draw(surface)
 
 class Panel():
-    def __init__(self, card_list, sun_value):
+    def __init__(self, card_list, sun_value, zombie_types=None):
         import time
         t0 = time.time()
         self.loadImages(sun_value)
@@ -432,6 +519,9 @@ class Panel():
         self.setupCards(card_list)
         t2 = time.time()
         self.tooltip = Tooltip()
+        # 僵尸预览相关
+        self.zombie_types = zombie_types or []
+        self.setupZombiePreview()
         print(f'[DEBUG] Panel.__init__: loadImages={t1-t0:.3f}s, setupCards={t2-t1:.3f}s')
 
     def loadFrame(self, name):
@@ -473,6 +563,30 @@ class Panel():
                 y += PANEL_Y_INTERNAL
             x += PANEL_X_INTERNAL
             self.card_list.append(Card(x, y, index, 0.75))
+
+    def setupZombiePreview(self):
+        """设置僵尸预览"""
+        self.zombie_frames = {}
+        self.zombie_frame_indices = {}
+        self.zombie_animation_timer = 0
+
+        # 去重并保持顺序
+        seen = set()
+        unique_zombies = []
+        for z in self.zombie_types:
+            if z not in seen:
+                seen.add(z)
+                unique_zombies.append(z)
+        self.zombie_types = unique_zombies
+
+        # 加载每种僵尸的行走动画帧
+        for zombie_name in self.zombie_types:
+            frame_key = ZOMBIE_WALK_FRAMES.get(zombie_name)
+            if frame_key and frame_key in tool.GFX:
+                frames = tool.GFX[frame_key]
+                if isinstance(frames, list) and len(frames) > 0:
+                    self.zombie_frames[zombie_name] = frames
+                    self.zombie_frame_indices[zombie_name] = 0
 
     def checkCardClick(self, mouse_pos):
         delete_card = None
@@ -523,10 +637,18 @@ class Panel():
         return card_index_list
 
     def update(self, current_time, mouse_hover_pos=None):
-        """更新 Panel 状态，包括 Tooltip"""
+        """更新 Panel 状态，包括 Tooltip 和僵尸动画"""
         self.current_time = current_time
         self.checkCardHover(mouse_hover_pos)
         self.tooltip.update(current_time)
+        # 更新僵尸动画帧
+        if current_time - self.zombie_animation_timer >= 150:
+            self.zombie_animation_timer = current_time
+            for zombie_name in self.zombie_frames:
+                frames = self.zombie_frames[zombie_name]
+                self.zombie_frame_indices[zombie_name] = (
+                    self.zombie_frame_indices[zombie_name] + 1
+                ) % len(frames)
 
     def checkCardHover(self, mouse_hover_pos):
         """检查卡片悬浮状态并更新 Tooltip"""
@@ -558,7 +680,92 @@ class Panel():
 
         if self.selected_num == CARD_LIST_NUM:
             surface.blit(self.button_image, self.button_rect)
+
+        # 绘制僵尸预览
+        self.drawZombiePreview(surface)
+
         self.tooltip.draw(surface)
+
+    def drawZombiePreview(self, surface):
+        """绘制僵尸预览区域"""
+        if not self.zombie_frames:
+            return
+
+        # 预览区域配置
+        preview_x = c.scale(460)  # 右侧区域起始 x
+        preview_y = c.scale(100)  # 起始 y
+        preview_width = c.scale(330)
+        preview_height = c.scale(450)
+
+        # 绘制半透明背景
+        bg_surface = pg.Surface((preview_width, preview_height), pg.SRCALPHA)
+        bg_color = (20, 25, 40, 220)
+        pg.draw.rect(bg_surface, bg_color, (0, 0, preview_width, preview_height),
+                     border_radius=c.scale(12))
+        # 绘制边框
+        border_color = (180, 140, 60, 255)
+        pg.draw.rect(bg_surface, border_color, (0, 0, preview_width, preview_height),
+                     width=c.scale(3), border_radius=c.scale(12))
+        surface.blit(bg_surface, (preview_x, preview_y))
+
+        # 绘制标题
+        try:
+            title_font = pg.font.SysFont('SimHei', c.scale(20), bold=True)
+        except:
+            title_font = pg.font.SysFont(None, c.scale(22))
+        title_text = title_font.render('本关僵尸', True, (255, 215, 100))
+        title_rect = title_text.get_rect(centerx=preview_x + preview_width // 2,
+                                         y=preview_y + c.scale(12))
+        surface.blit(title_text, title_rect)
+
+        # 僵尸图像显示尺寸和布局
+        zombie_display_size = c.scale(80)
+        cols = 3
+        spacing_x = c.scale(105)
+        spacing_y = c.scale(110)
+        start_x = preview_x + c.scale(25)
+        start_y = preview_y + c.scale(50)
+
+        try:
+            name_font = pg.font.SysFont('SimHei', c.scale(12))
+        except:
+            name_font = pg.font.SysFont(None, c.scale(14))
+
+        for i, zombie_name in enumerate(self.zombie_types):
+            if zombie_name not in self.zombie_frames:
+                continue
+
+            col = i % cols
+            row = i // cols
+            x = start_x + col * spacing_x
+            y = start_y + row * spacing_y
+
+            # 获取当前帧
+            frames = self.zombie_frames[zombie_name]
+            frame_idx = self.zombie_frame_indices[zombie_name]
+            frame = frames[frame_idx]
+            frame_rect = frame.get_rect()
+
+            # 缩放以适配显示区域
+            scale_x = zombie_display_size / frame_rect.width
+            scale_y = zombie_display_size / frame_rect.height
+            scale = min(scale_x, scale_y) * 0.9
+
+            new_width = int(frame_rect.width * scale)
+            new_height = int(frame_rect.height * scale)
+            scaled_frame = pg.transform.smoothscale(frame, (new_width, new_height))
+
+            # 居中显示
+            img_x = x + (zombie_display_size - new_width) // 2
+            img_y = y + (zombie_display_size - new_height) // 2
+            surface.blit(scaled_frame, (img_x, img_y))
+
+            # 绘制僵尸名称
+            display_name = ZOMBIE_DISPLAY_NAMES.get(zombie_name, zombie_name)
+            name_text = name_font.render(display_name, True, (200, 205, 215))
+            name_rect = name_text.get_rect(centerx=x + zombie_display_size // 2,
+                                           y=y + zombie_display_size + c.scale(2))
+            surface.blit(name_text, name_rect)
 
 class MoveCard():
     def __init__(self, x, y, card_name, plant_name, scale=0.78):
@@ -694,19 +901,74 @@ class MoveBar():
         for card in self.card_list:
             card.draw(surface)
 
+    def drawTooltip(self, surface):
+        """MoveBar 不需要 Tooltip，空实现以保持接口一致"""
+        pass
+
+    def drawProtectAI(self, surface, right_margin=None):
+        """绘制"保护AI"高清文字（无边框，纯描边效果）
+        Args:
+            surface: 绘制表面
+            right_margin: 右边界 x 坐标
+        """
+        try:
+            font = pg.font.SysFont('SimHei', c.scale(32), bold=True)
+        except:
+            font = pg.font.SysFont(None, c.scale(34))
+
+        text = '保护AI'
+        text_surface = font.render(text, True, (255, 255, 255))
+        text_rect = text_surface.get_rect()
+
+        if right_margin is not None:
+            text_rect.right = right_margin - c.scale(20)
+        else:
+            text_rect.right = c.SCREEN_WIDTH - c.scale(25)
+        text_rect.y = c.scale(15)
+
+        # 外层阴影
+        shadow_color = (30, 20, 10)
+        shadow_offset = c.scale(3)
+        shadow_surface = font.render(text, True, shadow_color)
+        surface.blit(shadow_surface, (text_rect.x + shadow_offset, text_rect.y + shadow_offset))
+
+        # 描边层
+        outline_color = (139, 90, 43)
+        outline_offset = c.scale(2)
+        for dx in [-outline_offset, 0, outline_offset]:
+            for dy in [-outline_offset, 0, outline_offset]:
+                if dx != 0 or dy != 0:
+                    outline_surface = font.render(text, True, outline_color)
+                    surface.blit(outline_surface, (text_rect.x + dx, text_rect.y + dy))
+
+        # 主文字
+        main_color = (255, 215, 0)
+        main_surface = font.render(text, True, main_color)
+        surface.blit(main_surface, text_rect)
+
+        # 高光层
+        highlight_color = (255, 245, 180)
+        highlight_surface = font.render(text, True, highlight_color)
+        highlight_surface.set_alpha(100)
+        surface.blit(highlight_surface, (text_rect.x - c.scale(1), text_rect.y - c.scale(1)))
+
+        return text_rect.x
+
 
 class Tooltip:
     """植物卡片悬浮提示框"""
 
     # 动画帧间隔（毫秒）
     ANIMATION_INTERVAL = 100
-    # Tooltip 尺寸
-    TOOLTIP_WIDTH = c.scale(230)
-    TOOLTIP_HEIGHT = c.scale(95)
+    # Tooltip 尺寸（左右布局，加宽）
+    TOOLTIP_WIDTH = c.scale(320)
+    TOOLTIP_HEIGHT = c.scale(110)
+    # 左侧区域宽度
+    LEFT_AREA_WIDTH = c.scale(200)
     # 植物图像显示尺寸
-    PLANT_DISPLAY_SIZE = c.scale(70)
+    PLANT_DISPLAY_SIZE = c.scale(65)
     # 内边距
-    PADDING = c.scale(8)
+    PADDING = c.scale(10)
     # 行间距
     LINE_SPACING = c.scale(2)
 
@@ -802,8 +1064,23 @@ class Tooltip:
         self.rect = self.image.get_rect()
 
     def _drawHeader(self, plant_name):
-        """绘制头部：植物图像 + 产品名 + 产品说明（纵向排列）"""
-        # 绘制植物图像（左侧）
+        """绘制左右布局：左侧（植物图像+产品名+介绍），右侧（参照原型+植物名称）"""
+        # 字体
+        try:
+            product_font = pg.font.SysFont('SimHei', c.scale(14), bold=True)
+            desc_font = pg.font.SysFont('SimHei', c.scale(11))
+            label_font = pg.font.SysFont('SimHei', c.scale(11))
+            plant_name_font = pg.font.SysFont('SimHei', c.scale(14), bold=True)
+        except:
+            product_font = pg.font.SysFont(None, c.scale(16))
+            desc_font = pg.font.SysFont(None, c.scale(13))
+            label_font = pg.font.SysFont(None, c.scale(13))
+            plant_name_font = pg.font.SysFont(None, c.scale(16))
+
+        # ========== 左侧区域 ==========
+        # 绘制植物图像（左上角）
+        img_x = self.PADDING
+        img_y = self.PADDING
         if self.animation_frames and len(self.animation_frames) > 0:
             frame = self.animation_frames[self.frame_index % len(self.animation_frames)]
             frame_rect = frame.get_rect()
@@ -816,26 +1093,18 @@ class Tooltip:
             new_height = int(frame_rect.height * scale)
             scaled_frame = pg.transform.smoothscale(frame, (new_width, new_height))
 
-            img_x = self.PADDING + (self.PLANT_DISPLAY_SIZE - new_width) // 2
-            img_y = self.PADDING + (self.PLANT_DISPLAY_SIZE - new_height) // 2
-            self.image.blit(scaled_frame, (img_x, img_y))
+            img_draw_x = img_x + (self.PLANT_DISPLAY_SIZE - new_width) // 2
+            img_draw_y = img_y + (self.PLANT_DISPLAY_SIZE - new_height) // 2
+            self.image.blit(scaled_frame, (img_draw_x, img_draw_y))
+
+        # 文字区域（植物图像右侧）
+        text_x = img_x + self.PLANT_DISPLAY_SIZE + c.scale(8)
+        text_max_width = self.LEFT_AREA_WIDTH - self.PLANT_DISPLAY_SIZE - c.scale(18)
+        y_offset = self.PADDING + c.scale(2)
 
         # 获取文字信息
         product_name = PLANT_PRODUCT_NAMES.get(plant_name, '')
         product_desc = PLANT_PRODUCT_DESC.get(plant_name, '')
-
-        # 文字起始位置（图像右侧）
-        text_x = self.PADDING + self.PLANT_DISPLAY_SIZE + c.scale(10)
-        text_max_width = self.TOOLTIP_WIDTH - text_x - self.PADDING
-
-        try:
-            product_font = pg.font.SysFont('SimHei', c.scale(16), bold=True)
-            desc_font = pg.font.SysFont('SimHei', c.scale(12))
-        except:
-            product_font = pg.font.SysFont(None, c.scale(18))
-            desc_font = pg.font.SysFont(None, c.scale(14))
-
-        y_offset = self.PADDING + c.scale(10)
 
         # 绘制产品名称（金色加粗）
         if product_name:
@@ -843,11 +1112,11 @@ class Tooltip:
             for line in product_lines:
                 product_surface = product_font.render(line, True, (255, 215, 100))
                 self.image.blit(product_surface, (text_x, y_offset))
-                y_offset += product_surface.get_height() + c.scale(4)
+                y_offset += product_surface.get_height() + c.scale(2)
 
-        # 绘制产品说明（浅灰色，紧跟产品名下方）
+        # 绘制产品说明（浅灰色）
         if product_desc:
-            y_offset += c.scale(2)
+            y_offset += c.scale(3)
             desc_lines = self._wrapText(product_desc, desc_font, text_max_width)
             for line in desc_lines:
                 if y_offset + desc_font.get_height() > self.TOOLTIP_HEIGHT - self.PADDING:
@@ -855,6 +1124,32 @@ class Tooltip:
                 desc_surface = desc_font.render(line, True, (200, 205, 215))
                 self.image.blit(desc_surface, (text_x, y_offset))
                 y_offset += desc_font.get_height() + c.scale(2)
+
+        # ========== 分隔线 ==========
+        separator_x = self.LEFT_AREA_WIDTH
+        pg.draw.line(self.image, (100, 110, 130, 180),
+                     (separator_x, self.PADDING + c.scale(5)),
+                     (separator_x, self.TOOLTIP_HEIGHT - self.PADDING - c.scale(5)),
+                     width=c.scale(1))
+
+        # ========== 右侧区域 ==========
+        right_x = self.LEFT_AREA_WIDTH + c.scale(12)
+        right_width = self.TOOLTIP_WIDTH - self.LEFT_AREA_WIDTH - self.PADDING - c.scale(12)
+
+        # "参照原型" 标签（顶端对齐）
+        label_text = '参照原型'
+        label_surface = label_font.render(label_text, True, (150, 160, 180))
+        label_y = self.PADDING + c.scale(2)
+        self.image.blit(label_surface, (right_x, label_y))
+
+        # 植物中文名称
+        display_name = PLANT_DISPLAY_NAMES.get(plant_name, plant_name)
+        name_lines = self._wrapText(display_name, plant_name_font, right_width)
+        name_y = label_y + label_surface.get_height() + c.scale(6)
+        for line in name_lines:
+            name_surface = plant_name_font.render(line, True, (120, 220, 120))
+            self.image.blit(name_surface, (right_x, name_y))
+            name_y += name_surface.get_height() + c.scale(2)
 
     def _updatePosition(self, card_rect):
         """更新 Tooltip 位置，确保不超出屏幕"""

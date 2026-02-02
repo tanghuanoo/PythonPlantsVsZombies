@@ -9,7 +9,7 @@ BASE_SCREEN_WIDTH = 800
 BASE_SCREEN_HEIGHT = 600
 
 # 渲染缩放因子（清晰度优先：1600x1200 = 2x）
-RENDER_SCALE = 2
+RENDER_SCALE = 1
 
 # 资源像素比例（1x 资源=1，2x 资源=2）
 ASSET_PIXEL_RATIO = 1

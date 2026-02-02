@@ -188,7 +188,11 @@ class Level(tool.State):
 
     def initChoose(self):
         self.state = c.CHOOSE
-        self.panel = menubar.Panel(menubar.all_card_list, self.map_data[c.INIT_SUN_NAME])
+        # 从关卡数据中提取僵尸类型列表
+        zombie_types = []
+        for data in self.map_data.get(c.ZOMBIE_LIST, []):
+            zombie_types.append(data['name'])
+        self.panel = menubar.Panel(menubar.all_card_list, self.map_data[c.INIT_SUN_NAME], zombie_types)
 
     def choose(self, mouse_pos, mouse_click, mouse_hover_pos=None):
         if mouse_pos and mouse_click[0]:
@@ -723,11 +727,16 @@ class Level(tool.State):
         elif self.state == c.PLAY:
             self.menubar.draw(surface)
 
-            # 疯狂模式显示分数和倒计时（横向排列在右上角）
+            # 疯狂模式显示分数和倒计时（纵向堆叠在右上角）
             if self.is_crazy_mode:
-                score_left_x = self.menubar.drawScore(surface, self.score)
+                score_bottom_y, score_right_x = self.menubar.drawScore(surface, self.score)
                 remaining_time = self.checkCrazyModeTime()
-                self.menubar.drawTimer(surface, remaining_time, score_left_x)
+                self.menubar.drawTimer(surface, remaining_time, score_bottom_y, score_right_x)
+                # 在得分面板左侧显示"保护AI"
+                self.menubar.drawProtectAI(surface, score_right_x - c.scale(150))
+            else:
+                # 普通模式也显示"保护AI"，在右上角
+                self.menubar.drawProtectAI(surface)
 
             for i in range(self.map_y_len):
                 self.plant_groups[i].draw(surface)
