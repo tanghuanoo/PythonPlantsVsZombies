@@ -41,12 +41,34 @@ class Zombie(pg.sprite.Sprite):
     
     def loadFrames(self, frames, name, image_x, colorkey=c.BLACK):
         frame_list = tool.GFX[name]
-        rect = frame_list[0].get_rect()
-        width, height = rect.w, rect.h
-        width -= image_x
 
         for frame in frame_list:
-            frames.append(tool.get_image(frame, image_x, 0, width, height, colorkey))
+            rect = frame.get_rect()
+            actual_w, actual_h = rect.w, rect.h
+
+            # 检测是否为高清图片
+            is_hd = (actual_w > c.HD_ZOMBIE_WIDTH_THRESHOLD or
+                     actual_h > c.HD_ZOMBIE_HEIGHT_THRESHOLD)
+
+            if is_hd:
+                # 计算高清图的像素比例，按比例缩放裁剪参数
+                hd_ratio = actual_w / c.BASE_ZOMBIE_REF_WIDTH
+                scaled_x = int(image_x * hd_ratio)
+                crop_width = actual_w - scaled_x
+
+                # 目标尺寸与低清图一致：(原始宽度 - image_x) × 原始高度 × ASSET_SCALE
+                target_width = int((c.BASE_ZOMBIE_REF_WIDTH - image_x) * c.ASSET_SCALE)
+                target_height = int(c.BASE_ZOMBIE_REF_HEIGHT * c.ASSET_SCALE)
+
+                # 裁剪并缩放到目标尺寸
+                frames.append(tool.get_image_fit(
+                    frame, scaled_x, 0, crop_width, actual_h, colorkey,
+                    target_width=target_width, target_height=target_height
+                ))
+            else:
+                # 低清图使用原有逻辑
+                width = actual_w - image_x
+                frames.append(tool.get_image(frame, image_x, 0, width, actual_h, colorkey))
 
     def update(self, game_info):
         self.current_time = game_info[c.CURRENT_TIME]
