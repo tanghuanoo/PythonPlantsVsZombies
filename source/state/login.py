@@ -31,19 +31,22 @@ class LoginScreen(tool.State):
         self.connecting = False
 
         # 主面板居中位置
-        self.panel_width = 420
-        self.panel_height = 340
+        self.panel_width = c.scale(420)
+        self.panel_height = c.scale(340)
         self.panel_x = (c.SCREEN_WIDTH - self.panel_width) // 2
-        self.panel_y = 130
+        self.panel_y = c.scale(130)
 
         # 输入框位置（相对于面板）
-        self.name_input_rect = (self.panel_x + 60, self.panel_y + 120, 300, 40)
-        self.id_input_rect = (self.panel_x + 60, self.panel_y + 190, 300, 40)
+        self.name_input_rect = (self.panel_x + c.scale(60), self.panel_y + c.scale(120),
+                                c.scale(300), c.scale(40))
+        self.id_input_rect = (self.panel_x + c.scale(60), self.panel_y + c.scale(190),
+                              c.scale(300), c.scale(40))
 
         # 按钮位置
-        self.login_button_rect = pg.Rect(self.panel_x + 110, self.panel_y + 260, 200, 50)
-        self.settings_button_rect = pg.Rect(655, 15, 65, 28)
-        self.language_button_rect = pg.Rect(730, 15, 55, 28)
+        self.login_button_rect = pg.Rect(self.panel_x + c.scale(110), self.panel_y + c.scale(260),
+                                          c.scale(200), c.scale(50))
+        self.settings_button_rect = pg.Rect(c.scale(655), c.scale(15), c.scale(65), c.scale(28))
+        self.language_button_rect = pg.Rect(c.scale(730), c.scale(15), c.scale(55), c.scale(28))
 
         # 设置弹窗状态
         self.show_settings = False
@@ -53,11 +56,11 @@ class LoginScreen(tool.State):
         self.settings_message_color = c.GREEN
 
         # 设置弹窗输入框和按钮位置
-        self.settings_panel_rect = pg.Rect(150, 150, 500, 250)
-        self.settings_url_input_rect = (180, 240, 440, 40)
-        self.settings_test_button_rect = pg.Rect(180, 310, 120, 40)
-        self.settings_save_button_rect = pg.Rect(320, 310, 120, 40)
-        self.settings_cancel_button_rect = pg.Rect(460, 310, 120, 40)
+        self.settings_panel_rect = pg.Rect(c.scale(150), c.scale(150), c.scale(500), c.scale(250))
+        self.settings_url_input_rect = (c.scale(180), c.scale(240), c.scale(440), c.scale(40))
+        self.settings_test_button_rect = pg.Rect(c.scale(180), c.scale(310), c.scale(120), c.scale(40))
+        self.settings_save_button_rect = pg.Rect(c.scale(320), c.scale(310), c.scale(120), c.scale(40))
+        self.settings_cancel_button_rect = pg.Rect(c.scale(460), c.scale(310), c.scale(120), c.scale(40))
 
         # 加载背景图片
         self.background = None
@@ -395,13 +398,13 @@ class LoginScreen(tool.State):
         # 绘制标题 - 金黄色带描边（字体大小26适配中英文及描边）
         title_text = LANG.get('login_title')
         self.draw_outlined_text(surface, title_text,
-                               c.SCREEN_WIDTH // 2, self.panel_y + 50,
+                               c.SCREEN_WIDTH // 2, self.panel_y + c.scale(50),
                                26, PVZ_YELLOW, PVZ_BROWN_DARK)
 
         # 绘制姓名标签
-        label_font = pg.font.SysFont('SimHei', 22)
+        label_font = pg.font.SysFont('SimHei', c.scale(22))
         name_label = label_font.render(LANG.get('login_name'), True, PVZ_CREAM)
-        surface.blit(name_label, (self.panel_x + 60, self.panel_y + 90))
+        surface.blit(name_label, (self.panel_x + c.scale(60), self.panel_y + c.scale(90)))
 
         # 绘制姓名输入框 - PVZ风格
         self.draw_pvz_input_box(surface, self.name_input_rect, self.name_text,
@@ -409,7 +412,7 @@ class LoginScreen(tool.State):
 
         # 绘制工号标签
         id_label = label_font.render(LANG.get('login_employee_id'), True, PVZ_CREAM)
-        surface.blit(id_label, (self.panel_x + 60, self.panel_y + 160))
+        surface.blit(id_label, (self.panel_x + c.scale(60), self.panel_y + c.scale(160)))
 
         # 绘制工号输入框 - PVZ风格
         self.draw_pvz_input_box(surface, self.id_input_rect, self.employee_id_text,
@@ -430,19 +433,19 @@ class LoginScreen(tool.State):
         # 绘制离线模式提示
         if self.is_offline:
             self.draw_outlined_text(surface, LANG.get('login_offline_mode'),
-                                   c.SCREEN_WIDTH // 2, self.panel_y + self.panel_height + 30,
+                                   c.SCREEN_WIDTH // 2, self.panel_y + self.panel_height + c.scale(30),
                                    22, c.ORANGE, PVZ_BROWN_DARK)
 
         # 绘制错误消息
         if self.error_message:
             self.draw_outlined_text(surface, self.error_message,
-                                   c.SCREEN_WIDTH // 2, self.panel_y + 235,
+                                   c.SCREEN_WIDTH // 2, self.panel_y + c.scale(235),
                                    18, c.ORANGE, PVZ_BROWN_DARK)
 
         # 绘制连接提示
         if self.connecting:
             self.draw_outlined_text(surface, LANG.get('login_connecting'),
-                                   c.SCREEN_WIDTH // 2, self.panel_y + self.panel_height + 30,
+                                   c.SCREEN_WIDTH // 2, self.panel_y + self.panel_height + c.scale(30),
                                    22, c.WHITE, PVZ_BROWN_DARK)
 
         # 绘制设置弹窗
@@ -452,64 +455,69 @@ class LoginScreen(tool.State):
     def draw_wood_panel(self, surface, x, y, width, height):
         """绘制木质面板"""
         # 外层阴影
-        shadow_rect = pg.Rect(x + 6, y + 6, width, height)
-        pg.draw.rect(surface, (0, 0, 0, 100), shadow_rect, border_radius=15)
+        shadow_rect = pg.Rect(x + c.scale(6), y + c.scale(6), width, height)
+        pg.draw.rect(surface, (0, 0, 0, 100), shadow_rect, border_radius=c.scale(15))
 
         # 主面板背景 - 深棕色
         panel_rect = pg.Rect(x, y, width, height)
-        pg.draw.rect(surface, PVZ_BROWN, panel_rect, border_radius=12)
+        pg.draw.rect(surface, PVZ_BROWN, panel_rect, border_radius=c.scale(12))
 
         # 内层面板 - 浅棕色
-        inner_rect = pg.Rect(x + 8, y + 8, width - 16, height - 16)
-        pg.draw.rect(surface, PVZ_BROWN_LIGHT, inner_rect, border_radius=8)
+        inner_rect = pg.Rect(x + c.scale(8), y + c.scale(8),
+                             width - c.scale(16), height - c.scale(16))
+        pg.draw.rect(surface, PVZ_BROWN_LIGHT, inner_rect, border_radius=c.scale(8))
 
         # 金色边框
-        pg.draw.rect(surface, PVZ_YELLOW, panel_rect, 4, border_radius=12)
+        pg.draw.rect(surface, PVZ_YELLOW, panel_rect, c.scale(4), border_radius=c.scale(12))
 
         # 顶部装饰条 - 深棕色横条
-        top_bar = pg.Rect(x + 15, y + 15, width - 30, 8)
-        pg.draw.rect(surface, PVZ_BROWN_DARK, top_bar, border_radius=4)
+        top_bar = pg.Rect(x + c.scale(15), y + c.scale(15),
+                          width - c.scale(30), c.scale(8))
+        pg.draw.rect(surface, PVZ_BROWN_DARK, top_bar, border_radius=c.scale(4))
 
         # 底部装饰条
-        bottom_bar = pg.Rect(x + 15, y + height - 23, width - 30, 8)
-        pg.draw.rect(surface, PVZ_BROWN_DARK, bottom_bar, border_radius=4)
+        bottom_bar = pg.Rect(x + c.scale(15), y + height - c.scale(23),
+                             width - c.scale(30), c.scale(8))
+        pg.draw.rect(surface, PVZ_BROWN_DARK, bottom_bar, border_radius=c.scale(4))
 
         # 木纹效果 - 水平线条
         for i in range(4):
-            line_y = y + 60 + i * 70
-            if line_y < y + height - 40:
+            line_y = y + c.scale(60) + i * c.scale(70)
+            if line_y < y + height - c.scale(40):
                 pg.draw.line(surface, PVZ_BROWN_DARK,
-                           (x + 20, line_y), (x + width - 20, line_y), 1)
+                           (x + c.scale(20), line_y),
+                           (x + width - c.scale(20), line_y), c.scale(1))
 
     def draw_pvz_input_box(self, surface, rect, text, active):
         """绘制PVZ风格的输入框"""
         box_rect = pg.Rect(rect)
 
         # 输入框阴影
-        shadow = pg.Rect(rect[0] + 3, rect[1] + 3, rect[2], rect[3])
-        pg.draw.rect(surface, PVZ_BROWN_DARK, shadow, border_radius=8)
+        shadow = pg.Rect(rect[0] + c.scale(3), rect[1] + c.scale(3), rect[2], rect[3])
+        pg.draw.rect(surface, PVZ_BROWN_DARK, shadow, border_radius=c.scale(8))
 
         # 输入框背景 - 米黄色
-        pg.draw.rect(surface, PVZ_CREAM, box_rect, border_radius=8)
+        pg.draw.rect(surface, PVZ_CREAM, box_rect, border_radius=c.scale(8))
 
         # 边框颜色
         border_color = PVZ_YELLOW if active else PVZ_BROWN
-        pg.draw.rect(surface, border_color, box_rect, 3, border_radius=8)
+        pg.draw.rect(surface, border_color, box_rect, c.scale(3), border_radius=c.scale(8))
 
         # 文字
-        font = pg.font.SysFont('SimHei', 22)
+        font = pg.font.SysFont('SimHei', c.scale(22))
         if text:
             text_surface = font.render(text, True, PVZ_BROWN_DARK)
             text_rect = text_surface.get_rect()
-            text_rect.midleft = (rect[0] + 12, rect[1] + rect[3] // 2)
+            text_rect.midleft = (rect[0] + c.scale(12), rect[1] + rect[3] // 2)
             surface.blit(text_surface, text_rect)
 
         # 光标
         if active:
-            cursor_x = rect[0] + 12
+            cursor_x = rect[0] + c.scale(12)
             if text:
                 cursor_x += font.size(text)[0]
-            cursor_rect = pg.Rect(cursor_x, rect[1] + 8, 2, rect[3] - 16)
+            cursor_rect = pg.Rect(cursor_x, rect[1] + c.scale(8),
+                                  c.scale(2), rect[3] - c.scale(16))
             # 闪烁效果
             if (pg.time.get_ticks() // 500) % 2 == 0:
                 pg.draw.rect(surface, PVZ_BROWN_DARK, cursor_rect)
@@ -517,21 +525,23 @@ class LoginScreen(tool.State):
     def draw_pvz_button(self, surface, rect, text, base_color, font_size):
         """绘制PVZ风格的按钮"""
         # 按钮阴影
-        shadow = pg.Rect(rect.x + 4, rect.y + 4, rect.width, rect.height)
-        pg.draw.rect(surface, PVZ_BROWN_DARK, shadow, border_radius=10)
+        shadow = pg.Rect(rect.x + c.scale(4), rect.y + c.scale(4),
+                         rect.width, rect.height)
+        pg.draw.rect(surface, PVZ_BROWN_DARK, shadow, border_radius=c.scale(10))
 
         # 按钮主体 - 渐变效果模拟
-        pg.draw.rect(surface, base_color, rect, border_radius=10)
+        pg.draw.rect(surface, base_color, rect, border_radius=c.scale(10))
 
         # 高光效果
-        highlight = pg.Rect(rect.x + 4, rect.y + 4, rect.width - 8, rect.height // 3)
+        highlight = pg.Rect(rect.x + c.scale(4), rect.y + c.scale(4),
+                            rect.width - c.scale(8), rect.height // 3)
         highlight_color = (min(base_color[0] + 40, 255),
                           min(base_color[1] + 40, 255),
                           min(base_color[2] + 40, 255))
-        pg.draw.rect(surface, highlight_color, highlight, border_radius=6)
+        pg.draw.rect(surface, highlight_color, highlight, border_radius=c.scale(6))
 
         # 金色边框
-        pg.draw.rect(surface, PVZ_YELLOW, rect, 3, border_radius=10)
+        pg.draw.rect(surface, PVZ_YELLOW, rect, c.scale(3), border_radius=c.scale(10))
 
         # 按钮文字 - 带描边
         self.draw_outlined_text(surface, text, rect.centerx, rect.centery,
@@ -540,26 +550,29 @@ class LoginScreen(tool.State):
     def draw_small_button(self, surface, rect, text):
         """绘制小型按钮"""
         # 按钮阴影
-        shadow = pg.Rect(rect.x + 2, rect.y + 2, rect.width, rect.height)
-        pg.draw.rect(surface, (0, 0, 0), shadow, border_radius=5)
+        shadow = pg.Rect(rect.x + c.scale(2), rect.y + c.scale(2),
+                         rect.width, rect.height)
+        pg.draw.rect(surface, (0, 0, 0), shadow, border_radius=c.scale(5))
 
         # 按钮主体
-        pg.draw.rect(surface, PVZ_BROWN_LIGHT, rect, border_radius=5)
-        pg.draw.rect(surface, PVZ_YELLOW, rect, 2, border_radius=5)
+        pg.draw.rect(surface, PVZ_BROWN_LIGHT, rect, border_radius=c.scale(5))
+        pg.draw.rect(surface, PVZ_YELLOW, rect, c.scale(2), border_radius=c.scale(5))
 
         # 文字
-        font = pg.font.SysFont('SimHei', 12)
+        font = pg.font.SysFont('SimHei', c.scale(12))
         text_surface = font.render(text, True, PVZ_CREAM)
         text_rect = text_surface.get_rect(center=rect.center)
         surface.blit(text_surface, text_rect)
 
     def draw_outlined_text(self, surface, text, x, y, size, color, outline_color):
         """绘制带描边的文字"""
-        font = pg.font.SysFont('SimHei', size, bold=True)
+        scaled_size = c.scale(size)
+        font = pg.font.SysFont('SimHei', scaled_size, bold=True)
+        outline_offset = c.scale(2)
 
         # 绘制描边（8个方向）
-        for dx in [-2, 0, 2]:
-            for dy in [-2, 0, 2]:
+        for dx in [-outline_offset, 0, outline_offset]:
+            for dy in [-outline_offset, 0, outline_offset]:
                 if dx != 0 or dy != 0:
                     outline_surface = font.render(text, True, outline_color)
                     outline_rect = outline_surface.get_rect(center=(x + dx, y + dy))
@@ -584,13 +597,13 @@ class LoginScreen(tool.State):
 
         # 标题 - 金黄色带描边
         self.draw_outlined_text(surface, LANG.get('settings_title'),
-                               self.settings_panel_rect.centerx, self.settings_panel_rect.y + 45,
+                               self.settings_panel_rect.centerx, self.settings_panel_rect.y + c.scale(45),
                                28, PVZ_YELLOW, PVZ_BROWN_DARK)
 
         # 服务器地址标签
-        label_font = pg.font.SysFont('SimHei', 18)
+        label_font = pg.font.SysFont('SimHei', c.scale(18))
         url_label = label_font.render(LANG.get('settings_server_url'), True, PVZ_CREAM)
-        surface.blit(url_label, (180, 210))
+        surface.blit(url_label, (c.scale(180), c.scale(210)))
 
         # 服务器地址输入框 - PVZ风格
         self.draw_pvz_input_box(surface, self.settings_url_input_rect,
@@ -611,5 +624,5 @@ class LoginScreen(tool.State):
         # 显示测试/保存消息
         if self.settings_message:
             self.draw_outlined_text(surface, self.settings_message,
-                                   self.settings_panel_rect.centerx, 365,
+                                   self.settings_panel_rect.centerx, c.scale(365),
                                    16, self.settings_message_color, PVZ_BROWN_DARK)

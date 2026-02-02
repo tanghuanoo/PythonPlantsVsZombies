@@ -133,9 +133,9 @@ class LoadingScreen(tool.State):
 
             # 文本自动换行处理
             # 使用更清晰美观的字体：微软雅黑（中文）和 Segoe UI（英文）
-            zh_font = pg.font.SysFont('Microsoft YaHei', 28, bold=True)  # 中文使用微软雅黑，加粗
-            en_font = pg.font.SysFont('Segoe UI', 20, italic=True)  # 英文使用 Segoe UI 斜体
-            max_width = c.SCREEN_WIDTH - 100  # 左右各留50像素边距
+            zh_font = pg.font.SysFont('Microsoft YaHei', c.scale(28), bold=True)  # 中文使用微软雅黑，加粗
+            en_font = pg.font.SysFont('Segoe UI', c.scale(20), italic=True)  # 英文使用 Segoe UI 斜体
+            max_width = c.SCREEN_WIDTH - c.scale(100)  # 左右各留50像素边距
 
             # 将文本分割成多行
             zh_lines = self.wrap_text(zh_text, zh_font, max_width)
@@ -144,7 +144,7 @@ class LoadingScreen(tool.State):
             # 计算总高度
             zh_line_height = int(zh_font.get_linesize() * 1.3)  # 增加行间距
             en_line_height = int(en_font.get_linesize() * 1.2)  # 增加行间距
-            spacing = 20  # 中英文之间的间距增大
+            spacing = c.scale(20)  # 中英文之间的间距增大
             total_height = (zh_line_height * len(zh_lines) +
                           spacing +
                           en_line_height * len(en_lines))
@@ -177,22 +177,22 @@ class LoadingScreen(tool.State):
                 y_offset += en_line_height
 
             # 绘制进度指示器（小点点）
-            dot_y = c.SCREEN_HEIGHT - 50
-            dot_spacing = 30
+            dot_y = c.SCREEN_HEIGHT - c.scale(50)
+            dot_spacing = c.scale(30)
             total_width = len(self.stories) * dot_spacing
             start_x = (c.SCREEN_WIDTH - total_width) // 2
 
             for i in range(len(self.stories)):
-                dot_x = start_x + i * dot_spacing + 15
+                dot_x = start_x + i * dot_spacing + c.scale(15)
                 if i == self.current_story_index:
                     # 当前故事用金色实心圆
-                    pg.draw.circle(surface, c.GOLD, (dot_x, dot_y), 8)
+                    pg.draw.circle(surface, c.GOLD, (dot_x, dot_y), c.scale(8))
                 elif i < self.current_story_index:
                     # 已显示的故事用白色实心圆
-                    pg.draw.circle(surface, c.WHITE, (dot_x, dot_y), 8)
+                    pg.draw.circle(surface, c.WHITE, (dot_x, dot_y), c.scale(8))
                 else:
                     # 未显示的故事用灰色空心圆
-                    pg.draw.circle(surface, c.WHITE, (dot_x, dot_y), 8, 2)
+                    pg.draw.circle(surface, c.WHITE, (dot_x, dot_y), c.scale(8), c.scale(2))
 
             # 绘制"点击跳过"提示 - 更显眼的样式
             self.draw_skip_hint(surface)
@@ -202,7 +202,7 @@ class LoadingScreen(tool.State):
         skip_text = "Click to skip"
 
         # 使用清晰的字体
-        skip_font = pg.font.SysFont('Arial', 18)
+        skip_font = pg.font.SysFont('Arial', c.scale(18))
 
         # 计算闪烁效果（使用正弦波实现平滑闪烁）
         import math
@@ -211,7 +211,7 @@ class LoadingScreen(tool.State):
 
         # 绘制半透明背景条
         text_width = skip_font.size(skip_text)[0]
-        bg_rect = pg.Rect(0, c.SCREEN_HEIGHT - 40, c.SCREEN_WIDTH, 35)
+        bg_rect = pg.Rect(0, c.SCREEN_HEIGHT - c.scale(40), c.SCREEN_WIDTH, c.scale(35))
         bg_surface = pg.Surface((bg_rect.width, bg_rect.height))
         bg_surface.fill((30, 30, 40))
         bg_surface.set_alpha(180)
@@ -222,14 +222,15 @@ class LoadingScreen(tool.State):
         text_color = (220, 220, 230)
 
         # 绘制描边
-        for dx in [-1, 0, 1]:
-            for dy in [-1, 0, 1]:
+        outline_offset = c.scale(1)
+        for dx in [-outline_offset, 0, outline_offset]:
+            for dy in [-outline_offset, 0, outline_offset]:
                 if dx != 0 or dy != 0:
                     outline_surface = skip_font.render(skip_text, True, outline_color)
                     outline_surface.set_alpha(alpha)
                     outline_rect = outline_surface.get_rect()
                     outline_rect.centerx = c.SCREEN_WIDTH // 2 + dx
-                    outline_rect.centery = c.SCREEN_HEIGHT - 22 + dy
+                    outline_rect.centery = c.SCREEN_HEIGHT - c.scale(22) + dy
                     surface.blit(outline_surface, outline_rect)
 
         # 绘制主文字
@@ -237,19 +238,19 @@ class LoadingScreen(tool.State):
         skip_surface.set_alpha(alpha)
         skip_rect = skip_surface.get_rect()
         skip_rect.centerx = c.SCREEN_WIDTH // 2
-        skip_rect.centery = c.SCREEN_HEIGHT - 22
+        skip_rect.centery = c.SCREEN_HEIGHT - c.scale(22)
         surface.blit(skip_surface, skip_rect)
 
         # 绘制两侧装饰线条
-        line_y = c.SCREEN_HEIGHT - 22
-        line_length = 60
-        gap = text_width // 2 + 20
+        line_y = c.SCREEN_HEIGHT - c.scale(22)
+        line_length = c.scale(60)
+        gap = text_width // 2 + c.scale(20)
 
         # 左侧线条
         pg.draw.line(surface, (100, 100, 120),
                     (c.SCREEN_WIDTH // 2 - gap - line_length, line_y),
-                    (c.SCREEN_WIDTH // 2 - gap, line_y), 2)
+                    (c.SCREEN_WIDTH // 2 - gap, line_y), c.scale(2))
         # 右侧线条
         pg.draw.line(surface, (100, 100, 120),
                     (c.SCREEN_WIDTH // 2 + gap, line_y),
-                    (c.SCREEN_WIDTH // 2 + gap + line_length, line_y), 2)
+                    (c.SCREEN_WIDTH // 2 + gap + line_length, line_y), c.scale(2))

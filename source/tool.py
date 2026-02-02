@@ -103,14 +103,20 @@ class Control():
         print('game over')
 
 def get_image(sheet, x, y, width, height, colorkey=c.BLACK, scale=1):
-        image = pg.Surface([width, height])
+        src_x = int(x * c.ASSET_PIXEL_RATIO)
+        src_y = int(y * c.ASSET_PIXEL_RATIO)
+        src_w = int(width * c.ASSET_PIXEL_RATIO)
+        src_h = int(height * c.ASSET_PIXEL_RATIO)
+        image = pg.Surface([src_w, src_h])
         rect = image.get_rect()
 
-        image.blit(sheet, (0, 0), (x, y, width, height))
+        image.blit(sheet, (0, 0), (src_x, src_y, src_w, src_h))
         image.set_colorkey(colorkey)
-        image = pg.transform.scale(image,
-                                   (int(rect.width*scale),
-                                    int(rect.height*scale)))
+        total_scale = scale * c.ASSET_SCALE
+        if total_scale != 1:
+            image = pg.transform.scale(image,
+                                       (int(rect.width*total_scale),
+                                        int(rect.height*total_scale)))
         return image
 
 def get_image_fit(sheet, x, y, width, height, colorkey=c.BLACK, target_width=None, target_height=None, keep_ratio=True):
@@ -128,8 +134,12 @@ def get_image_fit(sheet, x, y, width, height, colorkey=c.BLACK, target_width=Non
     Returns:
         缩放后的 Surface
     """
-    image = pg.Surface([width, height])
-    image.blit(sheet, (0, 0), (x, y, width, height))
+    src_x = int(x * c.ASSET_PIXEL_RATIO)
+    src_y = int(y * c.ASSET_PIXEL_RATIO)
+    src_w = int(width * c.ASSET_PIXEL_RATIO)
+    src_h = int(height * c.ASSET_PIXEL_RATIO)
+    image = pg.Surface([src_w, src_h])
+    image.blit(sheet, (0, 0), (src_x, src_y, src_w, src_h))
     image.set_colorkey(colorkey)
 
     if target_width is None and target_height is None:
@@ -229,7 +239,7 @@ def loadPlantImageRect():
 
 def renderText(text, font_size, color, bg_color=None):
     """渲染文字，返回 Surface 对象"""
-    font = pg.font.SysFont('Arial', font_size)
+    font = pg.font.SysFont('Arial', c.scale(font_size))
     if bg_color:
         text_surface = font.render(text, True, color, bg_color)
     else:
@@ -249,14 +259,16 @@ def renderInputBox(surface, rect, text, active, font_size=24, composing_text='')
     box_rect = pg.Rect(rect)
     # 绘制边框
     border_color = c.GOLD if active else c.WHITE
-    pg.draw.rect(surface, border_color, box_rect, 2)
+    pg.draw.rect(surface, border_color, box_rect, c.scale(2))
     # 绘制背景
-    bg_rect = pg.Rect(rect[0] + 2, rect[1] + 2, rect[2] - 4, rect[3] - 4)
+    bg_rect = pg.Rect(rect[0] + c.scale(2), rect[1] + c.scale(2),
+                      rect[2] - c.scale(4), rect[3] - c.scale(4))
     pg.draw.rect(surface, c.BLACK, bg_rect)
     # 渲染文字
-    font = pg.font.SysFont('SimHei', font_size)
-    text_x = rect[0] + 10
-    text_y = rect[1] + (rect[3] - font_size) // 2
+    font = pg.font.SysFont('SimHei', c.scale(font_size))
+    scaled_font_size = c.scale(font_size)
+    text_x = rect[0] + c.scale(10)
+    text_y = rect[1] + (rect[3] - scaled_font_size) // 2
 
     if text:
         text_surface = font.render(text, True, c.WHITE)
@@ -267,7 +279,8 @@ def renderInputBox(surface, rect, text, active, font_size=24, composing_text='')
     if composing_text:
         composing_surface = font.render(composing_text, True, c.GOLD)
         # 绘制下划线背景表示正在编辑
-        underline_rect = pg.Rect(text_x, text_y + font_size - 2, composing_surface.get_width(), 2)
+        underline_rect = pg.Rect(text_x, text_y + scaled_font_size - c.scale(2),
+                                 composing_surface.get_width(), c.scale(2))
         pg.draw.rect(surface, c.GOLD, underline_rect)
         surface.blit(composing_surface, (text_x, text_y))
 
@@ -281,7 +294,7 @@ def fadeInText(surface, text, alpha, pos, font_size=30, color=c.WHITE):
         font_size: 字体大小
         color: 文字颜色
     """
-    font = pg.font.SysFont('Arial', font_size)
+    font = pg.font.SysFont('Arial', c.scale(font_size))
     text_surface = font.render(text, True, color)
     text_surface.set_alpha(alpha)
     surface.blit(text_surface, pos)

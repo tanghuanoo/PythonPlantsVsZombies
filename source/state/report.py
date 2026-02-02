@@ -31,8 +31,10 @@ class GameReportScreen(tool.State):
         self.is_offline = False
 
         # 按钮位置
-        self.play_again_button_rect = pg.Rect(200, 520, 180, 45)
-        self.exit_button_rect = pg.Rect(420, 520, 180, 45)
+        self.play_again_button_rect = pg.Rect(c.scale(200), c.scale(520),
+                                              c.scale(180), c.scale(45))
+        self.exit_button_rect = pg.Rect(c.scale(420), c.scale(520),
+                                        c.scale(180), c.scale(45))
 
         # 排行榜自动刷新机制
         self.refresh_interval = 10000  # 10秒刷新一次
@@ -156,21 +158,21 @@ class GameReportScreen(tool.State):
                 pg.draw.line(surface, (r, g, b), (0, y), (c.SCREEN_WIDTH, y))
 
         # 绘制标题横幅（类似GameVictory的紫色飘带）
-        self.draw_banner(surface, LANG.get('report_title'), c.SCREEN_WIDTH // 2, 45)
+        self.draw_banner(surface, LANG.get('report_title'), c.SCREEN_WIDTH // 2, c.scale(45))
 
         # 左侧：成绩卡片
-        score_card_rect = pg.Rect(25, 95, 365, 185)
+        score_card_rect = pg.Rect(c.scale(25), c.scale(95), c.scale(365), c.scale(185))
         self.draw_pvz_card(surface, score_card_rect, LANG.get('report_score_card'))
 
         # 绘制最终分数（调整 y 坐标避免遮挡标题）
         self.draw_outlined_text(surface, LANG.get('report_final_score'),
-                               100, 145, 18, PVZ_CREAM, PVZ_BROWN_DARK)
+                               c.scale(100), c.scale(145), 18, PVZ_CREAM, PVZ_BROWN_DARK)
         self.draw_outlined_text(surface, str(self.score),
-                               100, 175, 36, PVZ_YELLOW, PVZ_BROWN_DARK)
+                               c.scale(100), c.scale(175), 36, PVZ_YELLOW, PVZ_BROWN_DARK)
 
         # 绘制排名（调整 y 坐标避免遮挡标题）
         self.draw_outlined_text(surface, LANG.get('report_rank'),
-                               260, 145, 18, PVZ_CREAM, PVZ_BROWN_DARK)
+                               c.scale(260), c.scale(145), 18, PVZ_CREAM, PVZ_BROWN_DARK)
         if self.is_offline:
             rank_text = LANG.get('report_offline')
             rank_color = c.RED
@@ -183,19 +185,20 @@ class GameReportScreen(tool.State):
             rank_text = LANG.get('report_no_rank')
             rank_color = c.ORANGE
             rank_size = 18
-        self.draw_outlined_text(surface, rank_text, 260, 175, rank_size, rank_color, PVZ_BROWN_DARK)
+        self.draw_outlined_text(surface, rank_text, c.scale(260), c.scale(175),
+                               rank_size, rank_color, PVZ_BROWN_DARK)
 
         # 绘制游戏时长（调整 y 坐标）
         duration_seconds = self.game_duration // 1000
         minutes = duration_seconds // 60
         seconds = duration_seconds % 60
         self.draw_outlined_text(surface, LANG.get('report_duration'),
-                               100, 220, 18, PVZ_CREAM, PVZ_BROWN_DARK)
+                               c.scale(100), c.scale(220), 18, PVZ_CREAM, PVZ_BROWN_DARK)
         self.draw_outlined_text(surface, f"{minutes:02d}:{seconds:02d}",
-                               100, 250, 28, c.WHITE, PVZ_BROWN_DARK)
+                               c.scale(100), c.scale(250), 28, c.WHITE, PVZ_BROWN_DARK)
 
         # 右侧：击杀统计卡片
-        kills_card_rect = pg.Rect(410, 95, 365, 185)
+        kills_card_rect = pg.Rect(c.scale(410), c.scale(95), c.scale(365), c.scale(185))
         self.draw_pvz_card(surface, kills_card_rect, LANG.get('report_kills_title'))
 
         # 绘制各类僵尸击杀统计
@@ -210,39 +213,40 @@ class GameReportScreen(tool.State):
         total_kills = sum(self.zombies_killed.values())
         # 调整总击杀位置，确保在面板内（面板左边界410，内容从420开始）
         total_kills_text = LANG.get('report_total_kills').format(total_kills)
-        total_font = pg.font.SysFont('SimHei', 18, bold=True)
+        total_font = pg.font.SysFont('SimHei', c.scale(18), bold=True)
         total_surface = total_font.render(total_kills_text, True, PVZ_YELLOW)
-        surface.blit(total_surface, (425, 140))
+        surface.blit(total_surface, (c.scale(425), c.scale(140)))
 
-        y_offset = 168
-        font = pg.font.SysFont('SimHei', 15)
+        y_offset = c.scale(168)
+        font = pg.font.SysFont('SimHei', c.scale(15))
         for zombie_type, count in self.zombies_killed.items():
-            if count > 0 and y_offset < kills_card_rect.bottom - 25:
+            if count > 0 and y_offset < kills_card_rect.bottom - c.scale(25):
                 zombie_name = LANG.get(zombie_name_map.get(zombie_type, zombie_type))
                 score_value = c.ZOMBIE_SCORES.get(zombie_type, 0)
 
                 # 僵尸名称
                 name_surface = font.render(f"{zombie_name}:", True, PVZ_CREAM)
-                surface.blit(name_surface, (430, y_offset))
+                surface.blit(name_surface, (c.scale(430), y_offset))
 
                 # 数量
                 count_surface = font.render(LANG.get('report_count_unit').format(count), True, c.WHITE)
-                surface.blit(count_surface, (560, y_offset))
+                surface.blit(count_surface, (c.scale(560), y_offset))
 
                 # 得分
                 score_surface = font.render(f"(+{count * score_value})", True, PVZ_GREEN_LIGHT)
-                surface.blit(score_surface, (620, y_offset))
+                surface.blit(score_surface, (c.scale(620), y_offset))
 
-                y_offset += 22
+                y_offset += c.scale(22)
 
         # 底部：排行榜卡片（如果在线）
         if not self.is_offline and self.leaderboard:
-            leaderboard_card_rect = pg.Rect(25, 295, 750, 200)
+            leaderboard_card_rect = pg.Rect(c.scale(25), c.scale(295),
+                                             c.scale(750), c.scale(200))
             self.draw_pvz_card(surface, leaderboard_card_rect, LANG.get('report_leaderboard'))
 
-            y_offset = 335
-            col1_x = 50
-            col2_x = 410
+            y_offset = c.scale(335)
+            col1_x = c.scale(50)
+            col2_x = c.scale(410)
 
             for i, entry in enumerate(self.leaderboard[:10], 1):
                 name = entry.get('name', 'Unknown')
@@ -265,20 +269,20 @@ class GameReportScreen(tool.State):
                     color = PVZ_CREAM
 
                 rank_text = f"{i}. {display_name}: {score}"
-                font = pg.font.SysFont('SimHei', 17)
+                font = pg.font.SysFont('SimHei', c.scale(17))
                 text_surface = font.render(rank_text, True, color)
 
                 if i <= 5:
                     surface.blit(text_surface, (col1_x, y_offset))
-                    y_offset += 26
+                    y_offset += c.scale(26)
                 else:
                     if i == 6:
-                        y_offset = 335
+                        y_offset = c.scale(335)
                     surface.blit(text_surface, (col2_x, y_offset))
-                    y_offset += 26
+                    y_offset += c.scale(26)
 
         # 绘制按钮
-        button_y = 515 if (not self.is_offline and self.leaderboard) else 320
+        button_y = c.scale(515) if (not self.is_offline and self.leaderboard) else c.scale(320)
         self.play_again_button_rect.y = button_y
         self.exit_button_rect.y = button_y
 
@@ -292,8 +296,8 @@ class GameReportScreen(tool.State):
 
     def draw_banner(self, surface, text, x, y):
         """绘制标题横幅（紫色飘带风格）"""
-        banner_width = 500
-        banner_height = 60
+        banner_width = c.scale(500)
+        banner_height = c.scale(60)
 
         # 横幅主体
         banner_rect = pg.Rect(x - banner_width // 2, y - banner_height // 2,
@@ -301,28 +305,28 @@ class GameReportScreen(tool.State):
 
         # 绘制飘带形状
         points = [
-            (banner_rect.left - 20, banner_rect.centery),
-            (banner_rect.left + 30, banner_rect.top),
-            (banner_rect.right - 30, banner_rect.top),
-            (banner_rect.right + 20, banner_rect.centery),
-            (banner_rect.right - 30, banner_rect.bottom),
-            (banner_rect.left + 30, banner_rect.bottom),
+            (banner_rect.left - c.scale(20), banner_rect.centery),
+            (banner_rect.left + c.scale(30), banner_rect.top),
+            (banner_rect.right - c.scale(30), banner_rect.top),
+            (banner_rect.right + c.scale(20), banner_rect.centery),
+            (banner_rect.right - c.scale(30), banner_rect.bottom),
+            (banner_rect.left + c.scale(30), banner_rect.bottom),
         ]
 
         # 紫色渐变效果（用两层模拟）
         pg.draw.polygon(surface, (80, 40, 120), points)  # 深紫色底层
         inner_points = [
-            (banner_rect.left - 10, banner_rect.centery),
-            (banner_rect.left + 35, banner_rect.top + 5),
-            (banner_rect.right - 35, banner_rect.top + 5),
-            (banner_rect.right + 10, banner_rect.centery),
-            (banner_rect.right - 35, banner_rect.bottom - 5),
-            (banner_rect.left + 35, banner_rect.bottom - 5),
+            (banner_rect.left - c.scale(10), banner_rect.centery),
+            (banner_rect.left + c.scale(35), banner_rect.top + c.scale(5)),
+            (banner_rect.right - c.scale(35), banner_rect.top + c.scale(5)),
+            (banner_rect.right + c.scale(10), banner_rect.centery),
+            (banner_rect.right - c.scale(35), banner_rect.bottom - c.scale(5)),
+            (banner_rect.left + c.scale(35), banner_rect.bottom - c.scale(5)),
         ]
         pg.draw.polygon(surface, (120, 60, 160), inner_points)  # 浅紫色
 
         # 金色边框
-        pg.draw.polygon(surface, PVZ_YELLOW, points, 3)
+        pg.draw.polygon(surface, PVZ_YELLOW, points, c.scale(3))
 
         # 标题文字
         self.draw_outlined_text(surface, text, x, y, 36, PVZ_YELLOW, PVZ_BROWN_DARK)
@@ -331,46 +335,50 @@ class GameReportScreen(tool.State):
         """绘制PVZ风格卡片"""
         # 阴影
         shadow_rect = rect.copy()
-        shadow_rect.x += 5
-        shadow_rect.y += 5
-        pg.draw.rect(surface, (0, 0, 0), shadow_rect, border_radius=12)
+        shadow_rect.x += c.scale(5)
+        shadow_rect.y += c.scale(5)
+        pg.draw.rect(surface, (0, 0, 0), shadow_rect, border_radius=c.scale(12))
 
         # 主背景 - 深棕色
-        pg.draw.rect(surface, PVZ_BROWN, rect, border_radius=12)
+        pg.draw.rect(surface, PVZ_BROWN, rect, border_radius=c.scale(12))
 
         # 内层背景 - 浅棕色
-        inner_rect = pg.Rect(rect.x + 6, rect.y + 6, rect.width - 12, rect.height - 12)
-        pg.draw.rect(surface, PVZ_BROWN_LIGHT, inner_rect, border_radius=8)
+        inner_rect = pg.Rect(rect.x + c.scale(6), rect.y + c.scale(6),
+                             rect.width - c.scale(12), rect.height - c.scale(12))
+        pg.draw.rect(surface, PVZ_BROWN_LIGHT, inner_rect, border_radius=c.scale(8))
 
         # 金色边框
-        pg.draw.rect(surface, PVZ_YELLOW, rect, 3, border_radius=12)
+        pg.draw.rect(surface, PVZ_YELLOW, rect, c.scale(3), border_radius=c.scale(12))
 
         # 标题背景条
-        title_bar = pg.Rect(rect.x + 10, rect.y + 8, rect.width - 20, 28)
-        pg.draw.rect(surface, PVZ_BROWN_DARK, title_bar, border_radius=5)
+        title_bar = pg.Rect(rect.x + c.scale(10), rect.y + c.scale(8),
+                            rect.width - c.scale(20), c.scale(28))
+        pg.draw.rect(surface, PVZ_BROWN_DARK, title_bar, border_radius=c.scale(5))
 
         # 标题文字
-        self.draw_outlined_text(surface, title, rect.centerx, rect.y + 22,
+        self.draw_outlined_text(surface, title, rect.centerx, rect.y + c.scale(22),
                                20, PVZ_YELLOW, PVZ_BROWN_DARK)
 
     def draw_pvz_button(self, surface, rect, text, base_color, font_size):
         """绘制PVZ风格按钮"""
         # 按钮阴影
-        shadow = pg.Rect(rect.x + 4, rect.y + 4, rect.width, rect.height)
-        pg.draw.rect(surface, PVZ_BROWN_DARK, shadow, border_radius=10)
+        shadow = pg.Rect(rect.x + c.scale(4), rect.y + c.scale(4),
+                         rect.width, rect.height)
+        pg.draw.rect(surface, PVZ_BROWN_DARK, shadow, border_radius=c.scale(10))
 
         # 按钮主体
-        pg.draw.rect(surface, base_color, rect, border_radius=10)
+        pg.draw.rect(surface, base_color, rect, border_radius=c.scale(10))
 
         # 高光效果
-        highlight = pg.Rect(rect.x + 4, rect.y + 4, rect.width - 8, rect.height // 3)
+        highlight = pg.Rect(rect.x + c.scale(4), rect.y + c.scale(4),
+                            rect.width - c.scale(8), rect.height // 3)
         highlight_color = (min(base_color[0] + 40, 255),
                           min(base_color[1] + 40, 255),
                           min(base_color[2] + 40, 255))
-        pg.draw.rect(surface, highlight_color, highlight, border_radius=6)
+        pg.draw.rect(surface, highlight_color, highlight, border_radius=c.scale(6))
 
         # 金色边框
-        pg.draw.rect(surface, PVZ_YELLOW, rect, 3, border_radius=10)
+        pg.draw.rect(surface, PVZ_YELLOW, rect, c.scale(3), border_radius=c.scale(10))
 
         # 按钮文字
         self.draw_outlined_text(surface, text, rect.centerx, rect.centery,
@@ -378,11 +386,13 @@ class GameReportScreen(tool.State):
 
     def draw_outlined_text(self, surface, text, x, y, size, color, outline_color):
         """绘制带描边的文字"""
-        font = pg.font.SysFont('SimHei', size, bold=True)
+        scaled_size = c.scale(size)
+        font = pg.font.SysFont('SimHei', scaled_size, bold=True)
+        outline_offset = c.scale(2)
 
         # 绘制描边
-        for dx in [-2, 0, 2]:
-            for dy in [-2, 0, 2]:
+        for dx in [-outline_offset, 0, outline_offset]:
+            for dy in [-outline_offset, 0, outline_offset]:
                 if dx != 0 or dy != 0:
                     outline_surface = font.render(text, True, outline_color)
                     outline_rect = outline_surface.get_rect(center=(x + dx, y + dy))

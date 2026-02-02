@@ -103,7 +103,14 @@ class Level(tool.State):
     def setupBackground(self):
         img_index = self.map_data[c.BACKGROUND_TYPE]
         self.background_type = img_index
-        self.background = tool.GFX[c.BACKGROUND_NAME][img_index]
+        bg = tool.GFX[c.BACKGROUND_NAME][img_index]
+        if c.ASSET_SCALE != 1:
+            self.background = pg.transform.scale(
+                bg,
+                (int(bg.get_width() * c.ASSET_SCALE), int(bg.get_height() * c.ASSET_SCALE))
+            )
+        else:
+            self.background = bg
         self.bg_rect = self.background.get_rect()
 
         self.level = pg.Surface((self.bg_rect.w, self.bg_rect.h)).convert()
@@ -138,7 +145,7 @@ class Level(tool.State):
         self.cars = []
         for i in range(self.map_y_len):
             _, y = self.map.getMapGridPos(0, i)
-            self.cars.append(plant.Car(-25, y+20, i))
+            self.cars.append(plant.Car(-c.scale(25), y + c.scale(20), i))
 
     def update(self, surface, current_time, mouse_pos, mouse_click, events, mouse_hover_pos=None):
         self.current_time = self.game_info[c.CURRENT_TIME] = current_time

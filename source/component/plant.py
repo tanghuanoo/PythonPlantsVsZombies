@@ -24,7 +24,7 @@ class Car(pg.sprite.Sprite):
         if self.state == c.IDLE:
             pass
         elif self.state == c.WALK:
-            self.rect.x += 4
+            self.rect.x += c.scale(4)
         if self.rect.x > c.SCREEN_WIDTH:
             self.dead = True
 
@@ -48,8 +48,8 @@ class Bullet(pg.sprite.Sprite):
         self.rect.x = x
         self.rect.y = start_y
         self.dest_y = dest_y
-        self.y_vel = 4 if (dest_y > start_y) else -4
-        self.x_vel = 4
+        self.y_vel = c.scale(4) if (dest_y > start_y) else -c.scale(4)
+        self.x_vel = c.scale(4)
         self.damage = damage
         self.ice = ice
         self.state = c.FLY
@@ -227,7 +227,7 @@ class Sun(Plant):
             scale = 0.6
             self.sun_value = 12
         Plant.__init__(self, x, y, c.SUN, 0, None, scale)
-        self.move_speed = 1
+        self.move_speed = c.scale(1)
         self.dest_x = dest_x
         self.dest_y = dest_y
         self.die_timer = 0
@@ -288,7 +288,7 @@ class RepeaterPea(Plant):
         if (self.current_time - self.shoot_timer) > 2000:
             self.bullet_group.add(Bullet(self.rect.right, self.rect.y, self.rect.y,
                                     c.BULLET_PEA, c.BULLET_DAMAGE_NORMAL, False))
-            self.bullet_group.add(Bullet(self.rect.right + 40, self.rect.y, self.rect.y,
+            self.bullet_group.add(Bullet(self.rect.right + c.scale(40), self.rect.y, self.rect.y,
                                     c.BULLET_PEA, c.BULLET_DAMAGE_NORMAL, False))
             self.shoot_timer = self.current_time
 
@@ -301,7 +301,7 @@ class ThreePeaShooter(Plant):
 
     def attacking(self):
         if (self.current_time - self.shoot_timer) > 2000:
-            offset_y = 9 # modify bullet in the same y position with bullets of other plants
+            offset_y = c.scale(9) # modify bullet in the same y position with bullets of other plants
             for i in range(3):
                 tmp_y = self.map_y + (i - 1)
                 if tmp_y < 0 or tmp_y >= c.GRID_Y_LEN:
@@ -471,7 +471,7 @@ class PuffShroom(Plant):
 
     def attacking(self):
         if (self.current_time - self.shoot_timer) > 3000:
-            self.bullet_group.add(Bullet(self.rect.right, self.rect.y + 10, self.rect.y + 10,
+            self.bullet_group.add(Bullet(self.rect.right, self.rect.y + c.scale(10), self.rect.y + c.scale(10),
                                     c.BULLET_MUSHROOM, c.BULLET_DAMAGE_NORMAL, True))
             self.shoot_timer = self.current_time
 
@@ -622,7 +622,7 @@ class Jalapeno(Plant):
         self.state = c.ATTACK
         self.start_explode = False
         self.explode_y_range = 0
-        self.explode_x_range = 377
+        self.explode_x_range = c.scale(377)
         
     def loadImages(self, name, scale):
         self.explode_frames = []
@@ -701,7 +701,7 @@ class ScaredyShroom(Plant):
 
     def attacking(self):
         if (self.current_time - self.shoot_timer) > 2000:
-            self.bullet_group.add(Bullet(self.rect.right, self.rect.y + 40, self.rect.y + 40,
+            self.bullet_group.add(Bullet(self.rect.right, self.rect.y + c.scale(40), self.rect.y + c.scale(40),
                                     c.BULLET_MUSHROOM, c.BULLET_DAMAGE_NORMAL, True))
             self.shoot_timer = self.current_time
 
@@ -835,7 +835,7 @@ class WallNutBowling(Plant):
         self.animate_interval = 200
         self.move_timer = 0
         self.move_interval = 70
-        self.vel_x = random.randint(12, 15)
+        self.vel_x = random.randint(c.scale(12), c.scale(15))
         self.vel_y = 0
         self.disable_hit_y = -1
 
@@ -873,7 +873,7 @@ class WallNutBowling(Plant):
     def shouldChangeDirection(self):
         if self.init_rect.centery <= c.MAP_OFFSET_Y:
             return True
-        elif self.init_rect.bottom + 20 >= c.SCREEN_HEIGHT:
+        elif self.init_rect.bottom + c.scale(20) >= c.SCREEN_HEIGHT:
             return True
         return False
 
@@ -918,7 +918,7 @@ class RedWallNutBowling(Plant):
         self.animate_interval = 200
         self.move_timer = 0
         self.move_interval = 70
-        self.vel_x = random.randint(12, 15)
+        self.vel_x = random.randint(c.scale(12), c.scale(15))
 
     def loadImages(self, name, scale):
         self.idle_frames = []

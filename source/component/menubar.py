@@ -5,10 +5,10 @@ import pygame as pg
 from .. import tool
 from .. import constants as c
 
-PANEL_Y_START = 87
-PANEL_X_START = 22
-PANEL_Y_INTERNAL = 74
-PANEL_X_INTERNAL = 53
+PANEL_Y_START = c.scale(87)
+PANEL_X_START = c.scale(22)
+PANEL_Y_INTERNAL = c.scale(74)
+PANEL_X_INTERNAL = c.scale(53)
 CARD_LIST_NUM = 8
 
 # 植物中文名称映射
@@ -71,13 +71,13 @@ plant_frozen_time_list = [5000, 5000, 5000, 18000, 30000, 5000, 5000, 5000, 1800
 all_card_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
 def getSunValueImage(sun_value):
-    font = pg.font.SysFont(None, 22)
-    width = 32
+    font = pg.font.SysFont(None, c.scale(22))
+    width = c.scale(32)
     msg_image = font.render(str(sun_value), True, c.NAVYBLUE, c.LIGHTYELLOW)
     msg_rect = msg_image.get_rect()
     msg_w = msg_rect.width
 
-    image = pg.Surface([width, 17])
+    image = pg.Surface([width, c.scale(17)])
     x = width - msg_w
 
     image.fill(c.LIGHTYELLOW)
@@ -198,11 +198,11 @@ class MenuBar():
     def __init__(self, card_list, sun_value):
         self.loadFrame(c.MENUBAR_BACKGROUND)
         self.rect = self.image.get_rect()
-        self.rect.x = 10
+        self.rect.x = c.scale(10)
         self.rect.y = 0
 
         self.sun_value = sun_value
-        self.card_offset_x = 32
+        self.card_offset_x = c.scale(32)
         self.setupCards(card_list)
         self.tooltip = Tooltip()
 
@@ -251,9 +251,9 @@ class MenuBar():
     def setupCards(self, card_list):
         self.card_list = []
         x = self.card_offset_x
-        y = 8
+        y = c.scale(8)
         for index in card_list:
-            x += 55
+            x += c.scale(55)
             self.card_list.append(Card(x, y, index))
 
     def checkCardClick(self, mouse_pos):
@@ -287,22 +287,22 @@ class MenuBar():
     def drawSunValue(self):
         self.value_image = getSunValueImage(self.sun_value)
         self.value_rect = self.value_image.get_rect()
-        self.value_rect.x = 21
-        self.value_rect.y = self.rect.bottom - 21
+        self.value_rect.x = c.scale(21)
+        self.value_rect.y = self.rect.bottom - c.scale(21)
 
         self.image.blit(self.value_image, self.value_rect)
 
     def drawScore(self, surface, score):
         """绘制分数显示（右上角最右边）"""
-        font = pg.font.SysFont('Arial', 24)
+        font = pg.font.SysFont('Arial', c.scale(24))
         score_text = font.render(f'Score: {score}', True, c.GOLD)
 
         # 计算文本矩形，放置在右上角最右边
         text_rect = score_text.get_rect()
-        padding_x = 10
-        padding_y = 5
-        text_rect.right = c.SCREEN_WIDTH - padding_x - 5
-        text_rect.y = 10
+        padding_x = c.scale(10)
+        padding_y = c.scale(5)
+        text_rect.right = c.SCREEN_WIDTH - padding_x - c.scale(5)
+        text_rect.y = c.scale(10)
 
         # 绘制半透明背景
         bg_rect = pg.Rect(
@@ -319,7 +319,7 @@ class MenuBar():
         surface.blit(bg_surface, (bg_rect.x, bg_rect.y))
 
         # 绘制边框
-        pg.draw.rect(surface, c.GOLD, bg_rect, 1, border_radius=5)
+        pg.draw.rect(surface, c.GOLD, bg_rect, c.scale(1), border_radius=c.scale(5))
 
         # 绘制文本
         surface.blit(score_text, (text_rect.x, text_rect.y))
@@ -342,19 +342,19 @@ class MenuBar():
         minutes = seconds // 60
         seconds = seconds % 60
 
-        font = pg.font.SysFont('Arial', 24)
+        font = pg.font.SysFont('Arial', c.scale(24))
         time_text = font.render(f'Time: {minutes:02d}:{seconds:02d}', True, c.WHITE)
 
         # 计算文本矩形，放置在 Score 左边
         text_rect = time_text.get_rect()
-        padding_x = 10
-        padding_y = 5
+        padding_x = c.scale(10)
+        padding_y = c.scale(5)
 
         if score_left_x is not None:
-            text_rect.right = score_left_x - 10  # 在 Score 左边，间隔 10 像素
+            text_rect.right = score_left_x - c.scale(10)  # 在 Score 左边，间隔 10 像素
         else:
-            text_rect.right = c.SCREEN_WIDTH - padding_x - 5
-        text_rect.y = 10  # 与 Score 同一行
+            text_rect.right = c.SCREEN_WIDTH - padding_x - c.scale(5)
+        text_rect.y = c.scale(10)  # 与 Score 同一行
 
         # 绘制半透明背景
         bg_rect = pg.Rect(
@@ -370,7 +370,7 @@ class MenuBar():
         surface.blit(bg_surface, (bg_rect.x, bg_rect.y))
 
         # 绘制边框
-        pg.draw.rect(surface, c.WHITE, bg_rect, 1, border_radius=5)
+        pg.draw.rect(surface, c.WHITE, bg_rect, c.scale(1), border_radius=c.scale(5))
 
         # 绘制文本
         surface.blit(time_text, (text_rect.x, text_rect.y))
@@ -382,15 +382,15 @@ class MenuBar():
             kills: 击杀数字典
         """
         total_kills = sum(kills.values())
-        font = pg.font.SysFont('Arial', 24)
+        font = pg.font.SysFont('Arial', c.scale(24))
         kills_text = font.render(f'Kills: {total_kills}', True, c.WHITE)
 
         # 计算文本矩形，放置在右上角
         text_rect = kills_text.get_rect()
-        padding_x = 10
-        padding_y = 5
-        text_rect.right = c.SCREEN_WIDTH - padding_x - 5
-        text_rect.y = 80
+        padding_x = c.scale(10)
+        padding_y = c.scale(5)
+        text_rect.right = c.SCREEN_WIDTH - padding_x - c.scale(5)
+        text_rect.y = c.scale(80)
 
         # 绘制半透明背景
         bg_rect = pg.Rect(
@@ -406,7 +406,7 @@ class MenuBar():
         surface.blit(bg_surface, (bg_rect.x, bg_rect.y))
 
         # 绘制边框
-        pg.draw.rect(surface, c.WHITE, bg_rect, 1, border_radius=5)
+        pg.draw.rect(surface, c.WHITE, bg_rect, c.scale(1), border_radius=c.scale(5))
 
         # 绘制文本
         surface.blit(kills_text, (text_rect.x, text_rect.y))
@@ -455,18 +455,18 @@ class Panel():
         
         self.value_image = getSunValueImage(sun_value)
         self.value_rect = self.value_image.get_rect()
-        self.value_rect.x = 21
-        self.value_rect.y = self.menu_rect.bottom - 21
+        self.value_rect.x = c.scale(21)
+        self.value_rect.y = self.menu_rect.bottom - c.scale(21)
 
         self.button_image =  self.loadFrame(c.START_BUTTON)
         self.button_rect = self.button_image.get_rect()
-        self.button_rect.x = 155
-        self.button_rect.y = 547
+        self.button_rect.x = c.scale(155)
+        self.button_rect.y = c.scale(547)
 
     def setupCards(self, card_list):
         self.card_list = []
         x = PANEL_X_START - PANEL_X_INTERNAL
-        y = PANEL_Y_START + 43 - PANEL_Y_INTERNAL
+        y = PANEL_Y_START + c.scale(43) - PANEL_Y_INTERNAL
         for i, index in enumerate(card_list):
             if i % 8 == 0:
                 x = PANEL_X_START - PANEL_X_INTERNAL
@@ -478,7 +478,7 @@ class Panel():
         delete_card = None
         for card in self.selected_cards:
             if delete_card: # when delete a card, move right cards to left
-                card.rect.x -= 55
+                card.rect.x -= c.scale(55)
             elif card.checkMouseClick(mouse_pos):
                 self.deleteCard(card.name_index)
                 delete_card = card
@@ -498,8 +498,8 @@ class Panel():
 
     def addCard(self, card):
         card.setSelect(False)
-        y = 8
-        x = 78 + self.selected_num * 55
+        y = c.scale(8)
+        x = c.scale(78) + self.selected_num * c.scale(55)
         self.selected_cards.append(Card(x, y, card.name_index))
         self.selected_num += 1
 
@@ -566,7 +566,7 @@ class MoveCard():
         self.rect = self.orig_image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.rect.w = 1
+        self.rect.w = c.scale(1)
         self.image = self.createShowImage()
 
         self.card_name = card_name
@@ -611,7 +611,7 @@ class MoveCard():
         if self.rect.w < self.orig_rect.w: #create a part card image
             image = pg.Surface([self.rect.w, self.rect.h])
             image.blit(self.orig_image, (0, 0), (0, 0, self.rect.w, self.rect.h))
-            self.rect.w += 1
+            self.rect.w += c.scale(1)
         else:
             image = self.orig_image
         return image
@@ -621,7 +621,7 @@ class MoveCard():
             self.move_timer = current_time
         elif (current_time - self.move_timer) >= c.CARD_MOVE_TIME:
             if self.rect.x > left_x:
-                self.rect.x -= 1
+                self.rect.x -= c.scale(1)
                 self.image = self.createShowImage()
             self.move_timer += c.CARD_MOVE_TIME
 
@@ -632,11 +632,11 @@ class MoveBar():
     def __init__(self, card_pool):
         self.loadFrame(c.MOVEBAR_BACKGROUND)
         self.rect = self.image.get_rect()
-        self.rect.x = 90
+        self.rect.x = c.scale(90)
         self.rect.y = 0
         
-        self.card_start_x = self.rect.x + 8
-        self.card_end_x = self.rect.right - 5
+        self.card_start_x = self.rect.x + c.scale(8)
+        self.card_end_x = self.rect.right - c.scale(5)
         self.card_pool = card_pool
         self.card_list = []
         self.create_timer = -c.MOVEBAR_CARD_FRESH_TIME
@@ -652,7 +652,7 @@ class MoveBar():
         if len(self.card_list) > 0 and self.card_list[-1].rect.right > self.card_end_x:
             return False
         x = self.card_end_x
-        y = 6
+        y = c.scale(6)
         index = random.randint(0, len(self.card_pool) - 1)
         card_index = self.card_pool[index]
         card_name = card_name_list[card_index] + '_move'
@@ -665,7 +665,7 @@ class MoveBar():
         left_x = self.card_start_x
         for card in self.card_list:
             card.update(left_x, self.current_time)
-            left_x = card.rect.right + 1
+            left_x = card.rect.right + c.scale(1)
 
         if(self.current_time - self.create_timer) > c.MOVEBAR_CARD_FRESH_TIME:
             if self.createCard():
@@ -701,14 +701,14 @@ class Tooltip:
     # 动画帧间隔（毫秒）
     ANIMATION_INTERVAL = 100
     # Tooltip 尺寸
-    TOOLTIP_WIDTH = 230
-    TOOLTIP_HEIGHT = 95
+    TOOLTIP_WIDTH = c.scale(230)
+    TOOLTIP_HEIGHT = c.scale(95)
     # 植物图像显示尺寸
-    PLANT_DISPLAY_SIZE = 70
+    PLANT_DISPLAY_SIZE = c.scale(70)
     # 内边距
-    PADDING = 8
+    PADDING = c.scale(8)
     # 行间距
-    LINE_SPACING = 2
+    LINE_SPACING = c.scale(2)
 
     def __init__(self):
         self.visible = False
@@ -789,12 +789,12 @@ class Tooltip:
         # 绘制半透明背景（深蓝色调）
         bg_color = (25, 30, 50, 235)
         pg.draw.rect(self.image, bg_color, (0, 0, self.TOOLTIP_WIDTH, self.TOOLTIP_HEIGHT),
-                     border_radius=10)
+                     border_radius=c.scale(10))
 
         # 绘制边框（金色）
         border_color = (255, 200, 50, 255)
         pg.draw.rect(self.image, border_color, (0, 0, self.TOOLTIP_WIDTH, self.TOOLTIP_HEIGHT),
-                     width=2, border_radius=10)
+                     width=c.scale(2), border_radius=c.scale(10))
 
         # 绘制植物图像和标题
         self._drawHeader(plant_name)
@@ -825,17 +825,17 @@ class Tooltip:
         product_desc = PLANT_PRODUCT_DESC.get(plant_name, '')
 
         # 文字起始位置（图像右侧）
-        text_x = self.PADDING + self.PLANT_DISPLAY_SIZE + 10
+        text_x = self.PADDING + self.PLANT_DISPLAY_SIZE + c.scale(10)
         text_max_width = self.TOOLTIP_WIDTH - text_x - self.PADDING
 
         try:
-            product_font = pg.font.SysFont('SimHei', 16, bold=True)
-            desc_font = pg.font.SysFont('SimHei', 12)
+            product_font = pg.font.SysFont('SimHei', c.scale(16), bold=True)
+            desc_font = pg.font.SysFont('SimHei', c.scale(12))
         except:
-            product_font = pg.font.SysFont(None, 18)
-            desc_font = pg.font.SysFont(None, 14)
+            product_font = pg.font.SysFont(None, c.scale(18))
+            desc_font = pg.font.SysFont(None, c.scale(14))
 
-        y_offset = self.PADDING + 10
+        y_offset = self.PADDING + c.scale(10)
 
         # 绘制产品名称（金色加粗）
         if product_name:
@@ -843,18 +843,18 @@ class Tooltip:
             for line in product_lines:
                 product_surface = product_font.render(line, True, (255, 215, 100))
                 self.image.blit(product_surface, (text_x, y_offset))
-                y_offset += product_surface.get_height() + 4
+                y_offset += product_surface.get_height() + c.scale(4)
 
         # 绘制产品说明（浅灰色，紧跟产品名下方）
         if product_desc:
-            y_offset += 2
+            y_offset += c.scale(2)
             desc_lines = self._wrapText(product_desc, desc_font, text_max_width)
             for line in desc_lines:
                 if y_offset + desc_font.get_height() > self.TOOLTIP_HEIGHT - self.PADDING:
                     break
                 desc_surface = desc_font.render(line, True, (200, 205, 215))
                 self.image.blit(desc_surface, (text_x, y_offset))
-                y_offset += desc_font.get_height() + 2
+                y_offset += desc_font.get_height() + c.scale(2)
 
     def _updatePosition(self, card_rect):
         """更新 Tooltip 位置，确保不超出屏幕"""
@@ -862,26 +862,26 @@ class Tooltip:
             return
 
         # 默认显示在卡片右侧
-        x = card_rect.right + 8
-        y = card_rect.top - 20
+        x = card_rect.right + c.scale(8)
+        y = card_rect.top - c.scale(20)
 
         # 边界检测 - 右边界，如果超出则显示在卡片左侧
-        if x + self.rect.width > c.SCREEN_WIDTH - 5:
-            x = card_rect.left - self.rect.width - 8
+        if x + self.rect.width > c.SCREEN_WIDTH - c.scale(5):
+            x = card_rect.left - self.rect.width - c.scale(8)
 
         # 边界检测 - 左边界
-        if x < 5:
+        if x < c.scale(5):
             x = card_rect.centerx - self.rect.width // 2
-            if x < 5:
-                x = 5
+            if x < c.scale(5):
+                x = c.scale(5)
 
         # 边界检测 - 下边界
-        if y + self.rect.height > c.SCREEN_HEIGHT - 5:
-            y = c.SCREEN_HEIGHT - 5 - self.rect.height
+        if y + self.rect.height > c.SCREEN_HEIGHT - c.scale(5):
+            y = c.SCREEN_HEIGHT - c.scale(5) - self.rect.height
 
         # 边界检测 - 上边界
-        if y < 5:
-            y = 5
+        if y < c.scale(5):
+            y = c.scale(5)
 
         self.rect.x = x
         self.rect.y = y

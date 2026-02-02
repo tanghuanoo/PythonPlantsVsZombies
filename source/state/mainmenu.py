@@ -34,8 +34,8 @@ class Menu(tool.State):
         self.option_frame_index = 0
         self.option_image = self.option_frames[self.option_frame_index]
         self.option_rect = self.option_image.get_rect()
-        self.option_rect.x = 435
-        self.option_rect.y = 75
+        self.option_rect.x = c.scale(435)
+        self.option_rect.y = c.scale(75)
         
         self.option_start = 0
         self.option_timer = 0
