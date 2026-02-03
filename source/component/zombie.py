@@ -5,6 +5,8 @@ from .. import tool
 from .. import constants as c
 
 class Zombie(pg.sprite.Sprite):
+    _FRAME_CACHE = {}
+
     def __init__(self, x, y, name, health, head_group=None, damage=1):
         pg.sprite.Sprite.__init__(self)
 
@@ -38,6 +40,9 @@ class Zombie(pg.sprite.Sprite):
         self.speed = c.scale(1)
         self.freeze_timer = 0
         self.is_hypno = False # the zombie is hypo and attack other zombies when it ate a HypnoShroom
+        self._flip_cache = {}
+        self._last_alpha = None
+        self._last_image = None
     
     def loadFrames(self, frames, name, image_x, colorkey=c.BLACK, scale=1):
         frame_list = tool.GFX[name]
@@ -148,7 +153,7 @@ class Zombie(pg.sprite.Sprite):
 
     def changeFrames(self, frames):
         '''change image frames and modify rect position'''
-        self.frames = frames
+        self.frames = self._get_frames(frames)
         self.frame_num = len(self.frames)
         self.frame_index = 0
         
@@ -161,7 +166,11 @@ class Zombie(pg.sprite.Sprite):
 
     def animation(self):
         if self.state == c.FREEZE:
-            self.image.set_alpha(192)
+            target_alpha = 192
+            if self.image is not self._last_image or target_alpha != self._last_alpha:
+                self.image.set_alpha(target_alpha)
+                self._last_image = self.image
+                self._last_alpha = target_alpha
             return
 
         if (self.current_time - self.animate_timer) > (self.animate_interval * self.getTimeRatio()):
@@ -174,12 +183,11 @@ class Zombie(pg.sprite.Sprite):
             self.animate_timer = self.current_time
 
         self.image = self.frames[self.frame_index]
-        if self.is_hypno:
-            self.image = pg.transform.flip(self.image, True, False)
-        if(self.current_time - self.hit_timer) >= 200:
-            self.image.set_alpha(255)
-        else:
-            self.image.set_alpha(192)
+        target_alpha = 255 if (self.current_time - self.hit_timer) >= 200 else 192
+        if self.image is not self._last_image or target_alpha != self._last_alpha:
+            self.image.set_alpha(target_alpha)
+            self._last_image = self.image
+            self._last_alpha = target_alpha
 
     def getTimeRatio(self):
         return self.ice_slow_ratio
@@ -252,16 +260,34 @@ class Zombie(pg.sprite.Sprite):
         self.is_hypno = True
         self.setWalk()
 
+    def _get_frames(self, frames):
+        if not self.is_hypno:
+            return frames
+        cached = self._flip_cache.get(id(frames))
+        if cached is None:
+            cached = [pg.transform.flip(frame, True, False) for frame in frames]
+            self._flip_cache[id(frames)] = cached
+        return cached
+
 class ZombieHead(Zombie):
     def __init__(self, x, y):
         Zombie.__init__(self, x, y, c.ZOMBIE_HEAD, 0)
         self.state = c.DIE
     
     def loadImages(self):
+        cache = Zombie._FRAME_CACHE.get(self.__class__)
+        if cache:
+            self.die_frames = cache['die_frames']
+            self.frames = self.die_frames
+            return
+
         self.die_frames = []
         die_name =  self.name
         self.loadFrames(self.die_frames, die_name, 0)
         self.frames = self.die_frames
+        Zombie._FRAME_CACHE[self.__class__] = {
+            'die_frames': self.die_frames
+        }
 
     def setWalk(self):
         self.animate_interval = 100
@@ -271,6 +297,17 @@ class NormalZombie(Zombie):
         Zombie.__init__(self, x, y, c.NORMAL_ZOMBIE, c.NORMAL_HEALTH, head_group)
 
     def loadImages(self):
+        cache = Zombie._FRAME_CACHE.get(self.__class__)
+        if cache:
+            self.walk_frames = cache['walk_frames']
+            self.attack_frames = cache['attack_frames']
+            self.losthead_walk_frames = cache['losthead_walk_frames']
+            self.losthead_attack_frames = cache['losthead_attack_frames']
+            self.die_frames = cache['die_frames']
+            self.boomdie_frames = cache['boomdie_frames']
+            self.frames = self.walk_frames
+            return
+
         self.walk_frames = []
         self.attack_frames = []
         self.losthead_walk_frames = []
@@ -294,6 +331,14 @@ class NormalZombie(Zombie):
             self.loadFrames(frame_list[i], name, tool.ZOMBIE_RECT[name]['x'])
 
         self.frames = self.walk_frames
+        Zombie._FRAME_CACHE[self.__class__] = {
+            'walk_frames': self.walk_frames,
+            'attack_frames': self.attack_frames,
+            'losthead_walk_frames': self.losthead_walk_frames,
+            'losthead_attack_frames': self.losthead_attack_frames,
+            'die_frames': self.die_frames,
+            'boomdie_frames': self.boomdie_frames
+        }
 
 class ConeHeadZombie(Zombie):
     def __init__(self, x, y, head_group):
@@ -301,6 +346,19 @@ class ConeHeadZombie(Zombie):
         self.helmet = True
 
     def loadImages(self):
+        cache = Zombie._FRAME_CACHE.get(self.__class__)
+        if cache:
+            self.helmet_walk_frames = cache['helmet_walk_frames']
+            self.helmet_attack_frames = cache['helmet_attack_frames']
+            self.walk_frames = cache['walk_frames']
+            self.attack_frames = cache['attack_frames']
+            self.losthead_walk_frames = cache['losthead_walk_frames']
+            self.losthead_attack_frames = cache['losthead_attack_frames']
+            self.die_frames = cache['die_frames']
+            self.boomdie_frames = cache['boomdie_frames']
+            self.frames = self.helmet_walk_frames
+            return
+
         self.helmet_walk_frames = []
         self.helmet_attack_frames = []
         self.walk_frames = []
@@ -330,6 +388,16 @@ class ConeHeadZombie(Zombie):
             self.loadFrames(frame_list[i], name, tool.ZOMBIE_RECT[name]['x'])
 
         self.frames = self.helmet_walk_frames
+        Zombie._FRAME_CACHE[self.__class__] = {
+            'helmet_walk_frames': self.helmet_walk_frames,
+            'helmet_attack_frames': self.helmet_attack_frames,
+            'walk_frames': self.walk_frames,
+            'attack_frames': self.attack_frames,
+            'losthead_walk_frames': self.losthead_walk_frames,
+            'losthead_attack_frames': self.losthead_attack_frames,
+            'die_frames': self.die_frames,
+            'boomdie_frames': self.boomdie_frames
+        }
 
 class BucketHeadZombie(Zombie):
     def __init__(self, x, y, head_group):
@@ -337,6 +405,19 @@ class BucketHeadZombie(Zombie):
         self.helmet = True
 
     def loadImages(self):
+        cache = Zombie._FRAME_CACHE.get(self.__class__)
+        if cache:
+            self.helmet_walk_frames = cache['helmet_walk_frames']
+            self.helmet_attack_frames = cache['helmet_attack_frames']
+            self.walk_frames = cache['walk_frames']
+            self.attack_frames = cache['attack_frames']
+            self.losthead_walk_frames = cache['losthead_walk_frames']
+            self.losthead_attack_frames = cache['losthead_attack_frames']
+            self.die_frames = cache['die_frames']
+            self.boomdie_frames = cache['boomdie_frames']
+            self.frames = self.helmet_walk_frames
+            return
+
         self.helmet_walk_frames = []
         self.helmet_attack_frames = []
         self.walk_frames = []
@@ -366,12 +447,33 @@ class BucketHeadZombie(Zombie):
             self.loadFrames(frame_list[i], name, tool.ZOMBIE_RECT[name]['x'])
 
         self.frames = self.helmet_walk_frames
+        Zombie._FRAME_CACHE[self.__class__] = {
+            'helmet_walk_frames': self.helmet_walk_frames,
+            'helmet_attack_frames': self.helmet_attack_frames,
+            'walk_frames': self.walk_frames,
+            'attack_frames': self.attack_frames,
+            'losthead_walk_frames': self.losthead_walk_frames,
+            'losthead_attack_frames': self.losthead_attack_frames,
+            'die_frames': self.die_frames,
+            'boomdie_frames': self.boomdie_frames
+        }
 
 class FlagZombie(Zombie):
     def __init__(self, x, y, head_group):
         Zombie.__init__(self, x, y, c.FLAG_ZOMBIE, c.FLAG_HEALTH, head_group)
     
     def loadImages(self):
+        cache = Zombie._FRAME_CACHE.get(self.__class__)
+        if cache:
+            self.walk_frames = cache['walk_frames']
+            self.attack_frames = cache['attack_frames']
+            self.losthead_walk_frames = cache['losthead_walk_frames']
+            self.losthead_attack_frames = cache['losthead_attack_frames']
+            self.die_frames = cache['die_frames']
+            self.boomdie_frames = cache['boomdie_frames']
+            self.frames = self.walk_frames
+            return
+
         self.walk_frames = []
         self.attack_frames = []
         self.losthead_walk_frames = []
@@ -395,6 +497,14 @@ class FlagZombie(Zombie):
             self.loadFrames(frame_list[i], name, tool.ZOMBIE_RECT[name]['x'])
 
         self.frames = self.walk_frames
+        Zombie._FRAME_CACHE[self.__class__] = {
+            'walk_frames': self.walk_frames,
+            'attack_frames': self.attack_frames,
+            'losthead_walk_frames': self.losthead_walk_frames,
+            'losthead_attack_frames': self.losthead_attack_frames,
+            'die_frames': self.die_frames,
+            'boomdie_frames': self.boomdie_frames
+        }
 
 class NewspaperZombie(Zombie):
     def __init__(self, x, y, head_group):
@@ -402,6 +512,19 @@ class NewspaperZombie(Zombie):
         self.helmet = True
 
     def loadImages(self):
+        cache = Zombie._FRAME_CACHE.get(self.__class__)
+        if cache:
+            self.helmet_walk_frames = cache['helmet_walk_frames']
+            self.helmet_attack_frames = cache['helmet_attack_frames']
+            self.walk_frames = cache['walk_frames']
+            self.attack_frames = cache['attack_frames']
+            self.losthead_walk_frames = cache['losthead_walk_frames']
+            self.losthead_attack_frames = cache['losthead_attack_frames']
+            self.die_frames = cache['die_frames']
+            self.boomdie_frames = cache['boomdie_frames']
+            self.frames = self.helmet_walk_frames
+            return
+
         self.helmet_walk_frames = []
         self.helmet_attack_frames = []
         self.walk_frames = []
@@ -444,3 +567,13 @@ class NewspaperZombie(Zombie):
             self.loadFrames(frame_list[i], name, tool.ZOMBIE_RECT[name]['x'], color, scale)
 
         self.frames = self.helmet_walk_frames
+        Zombie._FRAME_CACHE[self.__class__] = {
+            'helmet_walk_frames': self.helmet_walk_frames,
+            'helmet_attack_frames': self.helmet_attack_frames,
+            'walk_frames': self.walk_frames,
+            'attack_frames': self.attack_frames,
+            'losthead_walk_frames': self.losthead_walk_frames,
+            'losthead_attack_frames': self.losthead_attack_frames,
+            'die_frames': self.die_frames,
+            'boomdie_frames': self.boomdie_frames
+        }

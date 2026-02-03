@@ -36,6 +36,8 @@ class Car(pg.sprite.Sprite):
         surface.blit(self.image, self.rect)
 
 class Bullet(pg.sprite.Sprite):
+    _FRAME_CACHE = {}
+
     def __init__(self, x, start_y, dest_y, name, damage, ice):
         pg.sprite.Sprite.__init__(self)
 
@@ -93,18 +95,25 @@ class Bullet(pg.sprite.Sprite):
                 frames.append(tool.get_image(frame, x, y, width, height))
     
     def load_images(self):
+        cached = Bullet._FRAME_CACHE.get(self.name)
+        if cached:
+            self.fly_frames, self.explode_frames = cached
+            self.frames = self.fly_frames
+            return
+
         self.fly_frames = []
         self.explode_frames = []
-        
+
         fly_name = self.name
         if self.name == c.BULLET_MUSHROOM:
             explode_name = 'BulletMushRoomExplode'
         else:
             explode_name = 'PeaNormalExplode'
-        
+
         self.loadFrames(self.fly_frames, fly_name)
         self.loadFrames(self.explode_frames, explode_name)
-        
+
+        Bullet._FRAME_CACHE[self.name] = (self.fly_frames, self.explode_frames)
         self.frames = self.fly_frames
 
     def update(self, game_info):
@@ -151,6 +160,8 @@ class Plant(pg.sprite.Sprite):
         self.animate_timer = 0
         self.animate_interval = 100
         self.hit_timer = 0
+        self._last_alpha = None
+        self._last_image = None
 
     def loadFrames(self, frames, name, scale, color=c.BLACK):
         frame_list = tool.GFX[name]
@@ -238,10 +249,11 @@ class Plant(pg.sprite.Sprite):
             self.animate_timer = self.current_time
         
         self.image = self.frames[self.frame_index]
-        if(self.current_time - self.hit_timer) >= 200:
-            self.image.set_alpha(255)
-        else:
-            self.image.set_alpha(192)
+        target_alpha = 255 if (self.current_time - self.hit_timer) >= 200 else 192
+        if self.image is not self._last_image or target_alpha != self._last_alpha:
+            self.image.set_alpha(target_alpha)
+            self._last_image = self.image
+            self._last_alpha = target_alpha
 
     def canAttack(self, zombie):
         if (self.state != c.SLEEP and zombie.state != c.DIE and

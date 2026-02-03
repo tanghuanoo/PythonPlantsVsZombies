@@ -83,6 +83,11 @@ class Level(tool.State):
         self.game_info[c.CURRENT_TIME] = current_time
         self.map_y_len = c.GRID_Y_LEN
         self.map = map.Map(c.GRID_X_LEN, self.map_y_len)
+        self._collide_ratio = {
+            0.6: pg.sprite.collide_circle_ratio(0.6),
+            0.7: pg.sprite.collide_circle_ratio(0.7),
+            0.8: pg.sprite.collide_circle_ratio(0.8)
+        }
 
         t1 = time.time()
         self.loadMap()
@@ -484,8 +489,10 @@ class Level(tool.State):
         self.hint_plant = False
 
     def checkBulletCollisions(self):
-        collided_func = pg.sprite.collide_circle_ratio(0.7)
+        collided_func = self._collide_ratio[0.7]
         for i in range(self.map_y_len):
+            if len(self.zombie_groups[i]) == 0:
+                continue
             for bullet in self.bullet_groups[i]:
                 if bullet.state == c.FLY:
                     zombie = pg.sprite.spritecollideany(bullet, self.zombie_groups[i], collided_func)
@@ -498,11 +505,22 @@ class Level(tool.State):
             ratio = 0.6
         else:
             ratio = 0.7
-        collided_func = pg.sprite.collide_circle_ratio(ratio)
+        collided_func = self._collide_ratio[ratio]
         for i in range(self.map_y_len):
+            plants = self.plant_groups[i]
+            if len(plants) > 0:
+                min_left = min(plant.rect.left for plant in plants)
+                max_right = max(plant.rect.right for plant in plants)
+            else:
+                min_left = None
+                max_right = None
             hypo_zombies = []
             for zombie in self.zombie_groups[i]:
                 if zombie.state != c.WALK:
+                    continue
+                if len(plants) == 0:
+                    continue
+                if zombie.rect.left > max_right or zombie.rect.right < min_left:
                     continue
                 plant = pg.sprite.spritecollideany(zombie, self.plant_groups[i], collided_func)
                 if plant:
@@ -530,7 +548,7 @@ class Level(tool.State):
                         hypno_zombie.setAttack(zombie, False)
 
     def checkCarCollisions(self):
-        collided_func = pg.sprite.collide_circle_ratio(0.8)
+        collided_func = self._collide_ratio[0.8]
         for car in self.cars:
             zombies = pg.sprite.spritecollide(car, self.zombie_groups[car.map_y], False, collided_func)
             for zombie in zombies:
