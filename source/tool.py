@@ -9,6 +9,24 @@ from abc import abstractmethod
 import pygame as pg
 from . import constants as c
 
+_LOADING_SURFACE = None
+_LOADING_RECT = None
+
+def _refresh_loading_screen():
+    # Keep window responsive and avoid transient white areas during heavy loading.
+    if _LOADING_SURFACE is None:
+        return
+    try:
+        pg.event.pump()
+    except pg.error:
+        return
+    screen = pg.display.get_surface()
+    if not screen:
+        return
+    screen.fill((0, 0, 0))
+    screen.blit(_LOADING_SURFACE, _LOADING_RECT)
+    pg.display.update()
+
 class State():
     def __init__(self):
         self.start_time = 0.0
@@ -165,13 +183,15 @@ def get_image_fit(sheet, x, y, width, height, colorkey=c.BLACK, target_width=Non
 
     return image
 
-def load_image_frames(directory, image_name, colorkey, accept):
+def load_image_frames(directory, image_name, colorkey, accept, tick=None):
     frame_list = []
     tmp = {}
     # image_name is "Peashooter", pic name is 'Peashooter_1', get the index 1
     index_start = len(image_name) + 1 
     frame_num = 0;
     for pic in os.listdir(directory):
+        if tick:
+            tick()
         name, ext = os.path.splitext(pic)
         if ext.lower() in accept:
             index = int(name[index_start:])
@@ -183,6 +203,8 @@ def load_image_frames(directory, image_name, colorkey, accept):
                 img.set_colorkey(colorkey)
             tmp[index]= img
             frame_num += 1
+        if tick:
+            tick()
 
     for i in range(len(tmp)):
         frame_list.append(tmp[i])
@@ -190,25 +212,38 @@ def load_image_frames(directory, image_name, colorkey, accept):
 
 def load_all_gfx(directory, colorkey=c.WHITE, accept=('.png', '.jpg', '.bmp', '.gif')):
     graphics = {}
+    refresh = _refresh_loading_screen
+    refresh_counter = 0
+
+    def tick():
+        nonlocal refresh_counter
+        refresh_counter += 1
+        if refresh_counter >= 30:
+            refresh_counter = 0
+            refresh()
+
     for name1 in os.listdir(directory):
+        tick()
         # subfolders under the folder resources\graphics
         dir1 = os.path.join(directory, name1)
         if os.path.isdir(dir1):
             for name2 in os.listdir(dir1):
+                tick()
                 dir2 = os.path.join(dir1, name2)
                 if os.path.isdir(dir2):
                 # e.g. subfolders under the folder resources\graphics\Zombies
                     for name3 in os.listdir(dir2):
+                        tick()
                         dir3 = os.path.join(dir2, name3)
                         # e.g. subfolders or pics under the folder resources\graphics\Zombies\ConeheadZombie
                         if os.path.isdir(dir3):
                             # e.g. it's the folder resources\graphics\Zombies\ConeheadZombie\ConeheadZombieAttack
                             image_name, _ = os.path.splitext(name3)
-                            graphics[image_name] = load_image_frames(dir3, image_name, colorkey, accept)
+                            graphics[image_name] = load_image_frames(dir3, image_name, colorkey, accept, tick)
                         else:
                             # e.g. pics under the folder resources\graphics\Plants\Peashooter
                             image_name, _ = os.path.splitext(name2)
-                            graphics[image_name] = load_image_frames(dir2, image_name, colorkey, accept)
+                            graphics[image_name] = load_image_frames(dir2, image_name, colorkey, accept, tick)
                             break
                 else:
                 # e.g. pics under the folder resources\graphics\Screen
@@ -221,6 +256,8 @@ def load_all_gfx(directory, colorkey=c.WHITE, accept=('.png', '.jpg', '.bmp', '.
                             img = img.convert()
                             img.set_colorkey(colorkey)
                         graphics[name] = img
+                tick()
+    refresh()
     return graphics
 
 def loadZombieImageRect():
@@ -314,9 +351,13 @@ _loading_text = _loading_font.render('Loading...', True, (255, 255, 255))
 _loading_rect = _loading_text.get_rect(center=(c.SCREEN_WIDTH // 2, c.SCREEN_HEIGHT // 2))
 SCREEN.blit(_loading_text, _loading_rect)
 pg.display.flip()
-del _loading_font, _loading_text, _loading_rect
+_LOADING_SURFACE = _loading_text
+_LOADING_RECT = _loading_rect
+del _loading_font
 
 GFX = load_all_gfx(os.path.join("resources","graphics"))
 ORIGIN_GFX = load_all_gfx(os.path.join("resources","origin_graphics"))
+_LOADING_SURFACE = None
+_LOADING_RECT = None
 ZOMBIE_RECT = loadZombieImageRect()
 PLANT_RECT = loadPlantImageRect()
