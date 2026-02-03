@@ -431,8 +431,9 @@ class Level(tool.State):
             x, y, width, height = data['x'], data['y'], data['width'], data['height']
         else:
             x, y = 0, 0
-            rect = frame_list[0].get_rect()
-            width, height = rect.w, rect.h
+            min_w = min(f.get_rect().w for f in frame_list)
+            min_h = min(f.get_rect().h for f in frame_list)
+            width, height = min_w, min_h
 
         if (plant_name == c.SCAREDYSHROOM or plant_name == c.SUNSHROOM or
             plant_name == c.ICESHROOM or plant_name == c.HYPNOSHROOM or
@@ -449,7 +450,26 @@ class Level(tool.State):
         else:
             scale = 1
 
-        self.mouse_image = tool.get_image(frame_list[0], x, y, width, height, color, scale)
+        frame = frame_list[0]
+        actual_rect = frame.get_rect()
+        actual_w, actual_h = actual_rect.w, actual_rect.h
+        expected_w = x + width
+        expected_h = y + height
+        is_hd = (actual_w > expected_w * 2 or actual_h > expected_h * 2)
+
+        if is_hd:
+            hd_ratio = actual_w / expected_w if expected_w > 0 else 1
+            scaled_x = int(x * hd_ratio)
+            scaled_y = int(y * hd_ratio)
+            crop_width = int(width * hd_ratio)
+            crop_height = int(height * hd_ratio)
+            target_width = int(width * scale * c.ASSET_SCALE)
+            target_height = int(height * scale * c.ASSET_SCALE)
+            self.mouse_image = tool.get_image_fit(
+                frame, scaled_x, scaled_y, crop_width, crop_height, color,
+                target_width=target_width, target_height=target_height)
+        else:
+            self.mouse_image = tool.get_image(frame, x, y, width, height, color, scale)
         self.mouse_rect = self.mouse_image.get_rect()
         pg.mouse.set_visible(False)
         self.drag_plant = True
