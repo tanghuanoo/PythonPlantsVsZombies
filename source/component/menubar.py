@@ -507,64 +507,103 @@ class MenuBar():
         surface.blit(kills_text, (text_rect.x, text_rect.y))
 
     def drawProtectAI(self, surface, right_margin=None):
-        """绘制"保护AI"高清文字（无边框，纯描边效果）
+        """绘制"AI护栏"纵向文字（带背景边框，与植物栏风格统一）
         Args:
             surface: 绘制表面
             right_margin: 右边界 x 坐标（如果有得分面板，传入其左边界）
         """
         try:
-            font = pg.font.SysFont('SimHei', c.scale(32), bold=True)
+            font = pg.font.SysFont('SimHei', c.scale(22), bold=True)
         except:
-            font = pg.font.SysFont(None, c.scale(34))
+            font = pg.font.SysFont(None, c.scale(24))
 
-        text = '保护AI'
-
-        # 计算位置
-        text_surface = font.render(text, True, (255, 255, 255))
-        text_rect = text_surface.get_rect()
-
-        # 确保与植物栏有足够间距：最小左边界为菜单栏右边界 + 间距
-        min_left_x = self.rect.right + c.scale(30)
-
-        if right_margin is not None:
-            text_rect.right = right_margin - c.scale(40)
+        # 获取翻译文本并拆分为两行
+        text = LANG.get('protect_ai')
+        if 'AI' in text:
+            line1 = 'AI'
+            line2 = text.replace('AI', '').strip()
         else:
-            text_rect.right = c.SCREEN_WIDTH - c.scale(40)
+            line1 = text[:len(text)//2]
+            line2 = text[len(text)//2:]
 
-        # 如果文字左边界太靠近植物栏，则右移
-        if text_rect.x < min_left_x:
-            text_rect.x = min_left_x
+        # 计算两行文字的宽度，取最大值用于居中
+        line1_surface = font.render(line1, True, (255, 255, 255))
+        line2_surface = font.render(line2, True, (255, 255, 255))
+        max_text_width = max(line1_surface.get_width(), line2_surface.get_width())
 
-        text_rect.y = c.scale(15)
+        # 背景框尺寸 - 与植物栏高度一致
+        box_width = max_text_width + c.scale(16)
+        box_height = self.rect.height
+        box_x = self.rect.right - c.scale(2)  # 紧贴植物栏，略微重叠融合
+        box_y = self.rect.y
 
-        # 绘制多层描边实现立体效果
-        # 外层阴影（深色）
-        shadow_color = (30, 20, 10)
+        # 绘制背景（与植物栏相似的棕色渐变）
+        bg_rect = pg.Rect(box_x, box_y, box_width, box_height)
+        border_radius = c.scale(8)
+
+        # 背景填充 - 深棕色（圆角）+ 立体效果
+        bg_surface = pg.Surface((box_width, box_height), pg.SRCALPHA)
+
+        # 外层阴影（向右下偏移，增加立体感）
         shadow_offset = c.scale(3)
-        shadow_surface = font.render(text, True, shadow_color)
-        surface.blit(shadow_surface, (text_rect.x + shadow_offset, text_rect.y + shadow_offset))
+        shadow_rect = pg.Rect(shadow_offset, shadow_offset, box_width, box_height)
+        pg.draw.rect(bg_surface, (60, 30, 15), shadow_rect, border_radius=border_radius)
 
-        # 描边层（深金色）
+        # 主背景色
+        pg.draw.rect(bg_surface, (123, 62, 33), (0, 0, box_width, box_height), border_radius=border_radius)
+
+        # 内层高光边（左上方向，模拟光照）
+        inner_highlight = pg.Rect(c.scale(2), c.scale(2), box_width - c.scale(4), box_height - c.scale(4))
+        pg.draw.rect(bg_surface, (145, 80, 45), inner_highlight, c.scale(1), border_radius=border_radius - c.scale(2))
+
+        surface.blit(bg_surface, (box_x, box_y))
+
+        # 绘制圆角边框（#8b411a）
+        border_color = (139, 65, 26)
+        pg.draw.rect(surface, border_color, bg_rect, c.scale(2), border_radius=border_radius)
+
+        # 文字颜色
+        shadow_color = (30, 20, 10)
         outline_color = (139, 90, 43)
-        outline_offset = c.scale(2)
-        for dx in [-outline_offset, 0, outline_offset]:
-            for dy in [-outline_offset, 0, outline_offset]:
-                if dx != 0 or dy != 0:
-                    outline_surface = font.render(text, True, outline_color)
-                    surface.blit(outline_surface, (text_rect.x + dx, text_rect.y + dy))
-
-        # 主文字（亮金色渐变效果）
         main_color = (255, 215, 0)
-        main_surface = font.render(text, True, main_color)
-        surface.blit(main_surface, text_rect)
-
-        # 高光层（浅色，偏移-1像素）
         highlight_color = (255, 245, 180)
-        highlight_surface = font.render(text, True, highlight_color)
-        highlight_surface.set_alpha(100)
-        surface.blit(highlight_surface, (text_rect.x - c.scale(1), text_rect.y - c.scale(1)))
 
-        return text_rect.x  # 返回左边界供其他元素定位
+        # 计算文字垂直居中位置
+        line_height = font.get_height()
+        total_text_height = line_height * 2 + c.scale(4)
+        start_y = box_y + (box_height - total_text_height) // 2
+
+        # 绘制两行文字（居中对齐）
+        for i, line_text in enumerate([line1, line2]):
+            text_surface = font.render(line_text, True, main_color)
+            text_width = text_surface.get_width()
+            # 水平居中
+            text_x = box_x + (box_width - text_width) // 2
+            text_y = start_y + i * (line_height + c.scale(4))
+
+            # 外层阴影
+            shadow_offset = c.scale(2)
+            shadow_surface = font.render(line_text, True, shadow_color)
+            surface.blit(shadow_surface, (text_x + shadow_offset, text_y + shadow_offset))
+
+            # 描边层
+            outline_offset = c.scale(1)
+            for dx in [-outline_offset, 0, outline_offset]:
+                for dy in [-outline_offset, 0, outline_offset]:
+                    if dx != 0 or dy != 0:
+                        outline_surface = font.render(line_text, True, outline_color)
+                        surface.blit(outline_surface, (text_x + dx, text_y + dy))
+
+            # 主文字
+            main_surface = font.render(line_text, True, main_color)
+            surface.blit(main_surface, (text_x, text_y))
+
+            # 高光层
+            highlight_surface = font.render(line_text, True, highlight_color)
+            highlight_surface.set_alpha(80)
+            surface.blit(highlight_surface, (text_x - c.scale(1), text_y - c.scale(1)))
+
+        return box_x
 
     def draw(self, surface):
         self.drawSunValue()
@@ -971,61 +1010,103 @@ class MoveBar():
         pass
 
     def drawProtectAI(self, surface, right_margin=None):
-        """绘制"保护AI"高清文字（无边框，纯描边效果）
+        """绘制"AI护栏"纵向文字（带背景边框，与植物栏风格统一）
         Args:
             surface: 绘制表面
             right_margin: 右边界 x 坐标
         """
         try:
-            font = pg.font.SysFont('SimHei', c.scale(32), bold=True)
+            font = pg.font.SysFont('SimHei', c.scale(22), bold=True)
         except:
-            font = pg.font.SysFont(None, c.scale(34))
+            font = pg.font.SysFont(None, c.scale(24))
 
-        text = '保护AI'
-        text_surface = font.render(text, True, (255, 255, 255))
-        text_rect = text_surface.get_rect()
-
-        # 确保与植物栏有足够间距：最小左边界为菜单栏右边界 + 间距
-        min_left_x = self.rect.right + c.scale(30)
-
-        if right_margin is not None:
-            text_rect.right = right_margin - c.scale(40)
+        # 获取翻译文本并拆分为两行
+        text = LANG.get('protect_ai')
+        if 'AI' in text:
+            line1 = 'AI'
+            line2 = text.replace('AI', '').strip()
         else:
-            text_rect.right = c.SCREEN_WIDTH - c.scale(40)
+            line1 = text[:len(text)//2]
+            line2 = text[len(text)//2:]
 
-        # 如果文字左边界太靠近植物栏，则右移
-        if text_rect.x < min_left_x:
-            text_rect.x = min_left_x
+        # 计算两行文字的宽度，取最大值用于居中
+        line1_surface = font.render(line1, True, (255, 255, 255))
+        line2_surface = font.render(line2, True, (255, 255, 255))
+        max_text_width = max(line1_surface.get_width(), line2_surface.get_width())
 
-        text_rect.y = c.scale(15)
+        # 背景框尺寸 - 与植物栏高度一致
+        box_width = max_text_width + c.scale(16)
+        box_height = self.rect.height
+        box_x = self.rect.right - c.scale(2)  # 紧贴植物栏，略微重叠融合
+        box_y = self.rect.y
 
-        # 外层阴影
-        shadow_color = (30, 20, 10)
+        # 绘制背景（与植物栏相似的棕色渐变）
+        bg_rect = pg.Rect(box_x, box_y, box_width, box_height)
+        border_radius = c.scale(8)
+
+        # 背景填充 - 深棕色（圆角）+ 立体效果
+        bg_surface = pg.Surface((box_width, box_height), pg.SRCALPHA)
+
+        # 外层阴影（向右下偏移，增加立体感）
         shadow_offset = c.scale(3)
-        shadow_surface = font.render(text, True, shadow_color)
-        surface.blit(shadow_surface, (text_rect.x + shadow_offset, text_rect.y + shadow_offset))
+        shadow_rect = pg.Rect(shadow_offset, shadow_offset, box_width, box_height)
+        pg.draw.rect(bg_surface, (60, 30, 15), shadow_rect, border_radius=border_radius)
 
-        # 描边层
+        # 主背景色
+        pg.draw.rect(bg_surface, (123, 62, 33), (0, 0, box_width, box_height), border_radius=border_radius)
+
+        # 内层高光边（左上方向，模拟光照）
+        inner_highlight = pg.Rect(c.scale(2), c.scale(2), box_width - c.scale(4), box_height - c.scale(4))
+        pg.draw.rect(bg_surface, (145, 80, 45), inner_highlight, c.scale(1), border_radius=border_radius - c.scale(2))
+
+        surface.blit(bg_surface, (box_x, box_y))
+
+        # 绘制圆角边框（#8b411a）
+        border_color = (139, 65, 26)
+        pg.draw.rect(surface, border_color, bg_rect, c.scale(2), border_radius=border_radius)
+
+        # 文字颜色
+        shadow_color = (30, 20, 10)
         outline_color = (139, 90, 43)
-        outline_offset = c.scale(2)
-        for dx in [-outline_offset, 0, outline_offset]:
-            for dy in [-outline_offset, 0, outline_offset]:
-                if dx != 0 or dy != 0:
-                    outline_surface = font.render(text, True, outline_color)
-                    surface.blit(outline_surface, (text_rect.x + dx, text_rect.y + dy))
-
-        # 主文字
         main_color = (255, 215, 0)
-        main_surface = font.render(text, True, main_color)
-        surface.blit(main_surface, text_rect)
-
-        # 高光层
         highlight_color = (255, 245, 180)
-        highlight_surface = font.render(text, True, highlight_color)
-        highlight_surface.set_alpha(100)
-        surface.blit(highlight_surface, (text_rect.x - c.scale(1), text_rect.y - c.scale(1)))
 
-        return text_rect.x
+        # 计算文字垂直居中位置
+        line_height = font.get_height()
+        total_text_height = line_height * 2 + c.scale(4)
+        start_y = box_y + (box_height - total_text_height) // 2
+
+        # 绘制两行文字（居中对齐）
+        for i, line_text in enumerate([line1, line2]):
+            text_surface = font.render(line_text, True, main_color)
+            text_width = text_surface.get_width()
+            # 水平居中
+            text_x = box_x + (box_width - text_width) // 2
+            text_y = start_y + i * (line_height + c.scale(4))
+
+            # 外层阴影
+            shadow_offset = c.scale(2)
+            shadow_surface = font.render(line_text, True, shadow_color)
+            surface.blit(shadow_surface, (text_x + shadow_offset, text_y + shadow_offset))
+
+            # 描边层
+            outline_offset = c.scale(1)
+            for dx in [-outline_offset, 0, outline_offset]:
+                for dy in [-outline_offset, 0, outline_offset]:
+                    if dx != 0 or dy != 0:
+                        outline_surface = font.render(line_text, True, outline_color)
+                        surface.blit(outline_surface, (text_x + dx, text_y + dy))
+
+            # 主文字
+            main_surface = font.render(line_text, True, main_color)
+            surface.blit(main_surface, (text_x, text_y))
+
+            # 高光层
+            highlight_surface = font.render(line_text, True, highlight_color)
+            highlight_surface.set_alpha(80)
+            surface.blit(highlight_surface, (text_x - c.scale(1), text_y - c.scale(1)))
+
+        return box_x
 
 
 class Tooltip:

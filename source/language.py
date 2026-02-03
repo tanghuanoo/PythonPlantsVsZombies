@@ -112,6 +112,9 @@ class LanguageManager:
             'plant_desc_spikeweed': '零信任访问控制系统',
             'plant_desc_jalapeno': 'AI安全平台',
 
+            # Game Elements
+            'protect_ai': 'AI护栏',
+
             # Common
             'seconds': '秒',
             'points': '分',
@@ -213,6 +216,9 @@ class LanguageManager:
             'plant_desc_squash': 'Data Security Platform',
             'plant_desc_spikeweed': 'Zero Trust Access Control System',
             'plant_desc_jalapeno': 'AI Security Platform',
+
+            # Game Elements
+            'protect_ai': 'AI Guardrail',
 
             # Common
             'seconds': 's',
