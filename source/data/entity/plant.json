@@ -11,6 +11,7 @@
         "PotatoMine":{"x":0, "y":0, "width":75, "height":55},
         "Squash":{"x":0, "y":0, "width":140, "height":226},
         "SquashAim":{"x":0, "y":0, "width":140, "height":226},
-        "Spikeweed":{"x":0, "y":0, "width":85, "height":80}
+        "Spikeweed":{"x":0, "y":0, "width":85, "height":80},
+        "CherryBomb":{"x":0, "y":0, "width":112, "height":81}
     }
 }
