@@ -27,6 +27,7 @@ class Screen(tool.State):
     def setupImage(self, name):
         frame_rect = [0, 0, 800, 600]
         self.image = tool.get_image(tool.GFX[name], *frame_rect)
+        self.image = pg.transform.scale(self.image, (c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
         self.rect = self.image.get_rect()
         self.rect.x = 0
         self.rect.y = 0

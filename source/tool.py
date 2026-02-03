@@ -307,6 +307,15 @@ pg.key.set_repeat(500, 50)
 # 初始化剪贴板模块（用于粘贴功能）
 pg.scrap.init()
 
+# 显示加载提示
+SCREEN.fill((0, 0, 0))
+_loading_font = pg.font.SysFont('Arial', c.scale(48))
+_loading_text = _loading_font.render('Loading...', True, (255, 255, 255))
+_loading_rect = _loading_text.get_rect(center=(c.SCREEN_WIDTH // 2, c.SCREEN_HEIGHT // 2))
+SCREEN.blit(_loading_text, _loading_rect)
+pg.display.flip()
+del _loading_font, _loading_text, _loading_rect
+
 GFX = load_all_gfx(os.path.join("resources","graphics"))
 ORIGIN_GFX = load_all_gfx(os.path.join("resources","origin_graphics"))
 ZOMBIE_RECT = loadZombieImageRect()
