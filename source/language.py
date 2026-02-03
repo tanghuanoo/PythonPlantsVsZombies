@@ -78,6 +78,7 @@ class LanguageManager:
             'report_no_rank': '未上榜',
 
             # Zombie Names
+            'zombie_preview_title': '本关僵尸',
             'zombie_normal': '木马僵尸',
             'zombie_conehead': '勒索僵尸',
             'zombie_buckethead': '银狐僵尸',
@@ -152,6 +153,7 @@ class LanguageManager:
             'report_no_rank': 'Not Ranked',
 
             # Zombie Names
+            'zombie_preview_title': 'Zombies in This Level',
             'zombie_normal': 'Trojan Zombie',
             'zombie_conehead': 'Ransomware Zombie',
             'zombie_buckethead': 'SilverFox Zombie',

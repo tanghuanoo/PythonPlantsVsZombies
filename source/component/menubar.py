@@ -4,6 +4,7 @@ import random
 import pygame as pg
 from .. import tool
 from .. import constants as c
+from ..language import LANG
 
 PANEL_Y_START = c.scale(87)
 PANEL_X_START = c.scale(22)
@@ -27,6 +28,15 @@ ZOMBIE_DISPLAY_NAMES = {
     c.BUCKETHEAD_ZOMBIE: '银狐僵尸',
     c.FLAG_ZOMBIE: '钓鱼僵尸',
     c.NEWSPAPER_ZOMBIE: '漏洞僵尸',
+}
+
+# 僵尸常量到翻译键的映射
+ZOMBIE_LANG_KEYS = {
+    c.NORMAL_ZOMBIE: 'zombie_normal',
+    c.CONEHEAD_ZOMBIE: 'zombie_conehead',
+    c.BUCKETHEAD_ZOMBIE: 'zombie_buckethead',
+    c.FLAG_ZOMBIE: 'zombie_flag',
+    c.NEWSPAPER_ZOMBIE: 'zombie_newspaper',
 }
 
 # 僵尸图片水平偏移量（用于居中校正）
@@ -735,7 +745,7 @@ class Panel():
             title_font = pg.font.SysFont('SimHei', c.scale(20), bold=True)
         except:
             title_font = pg.font.SysFont(None, c.scale(22))
-        title_text = title_font.render('本关僵尸', True, (255, 215, 100))
+        title_text = title_font.render(LANG.get('zombie_preview_title'), True, (255, 215, 100))
         title_rect = title_text.get_rect(centerx=preview_x + preview_width // 2,
                                          y=preview_y + c.scale(12))
         surface.blit(title_text, title_rect)
@@ -784,7 +794,8 @@ class Panel():
             surface.blit(scaled_frame, (img_x, img_y))
 
             # 绘制僵尸名称
-            display_name = ZOMBIE_DISPLAY_NAMES.get(zombie_name, zombie_name)
+            lang_key = ZOMBIE_LANG_KEYS.get(zombie_name)
+            display_name = LANG.get(lang_key) if lang_key else zombie_name
             name_text = name_font.render(display_name, True, (200, 205, 215))
             name_rect = name_text.get_rect(centerx=x + zombie_display_size // 2,
                                            y=y + zombie_display_size + c.scale(2))
