@@ -322,7 +322,7 @@ class Sun(Plant):
 
 class SunFlower(Plant):
     def __init__(self, x, y, sun_group):
-        Plant.__init__(self, x, y, c.SUNFLOWER, c.PLANT_HEALTH, None)
+        Plant.__init__(self, x, y, c.SUNFLOWER, c.PLANT_HEALTH, None, 0.75)
         self.sun_timer = 0
         self.sun_group = sun_group
     
@@ -335,7 +335,7 @@ class SunFlower(Plant):
 
 class PeaShooter(Plant):
     def __init__(self, x, y, bullet_group):
-        Plant.__init__(self, x, y, c.PEASHOOTER, c.PLANT_HEALTH, bullet_group, 1.2)
+        Plant.__init__(self, x, y, c.PEASHOOTER, c.PLANT_HEALTH, bullet_group, 0.95)
         self.shoot_timer = 0
         
     def attacking(self):
@@ -346,7 +346,7 @@ class PeaShooter(Plant):
 
 class RepeaterPea(Plant):
     def __init__(self, x, y, bullet_group):
-        Plant.__init__(self, x, y, c.REPEATERPEA, c.PLANT_HEALTH, bullet_group, 1.25)
+        Plant.__init__(self, x, y, c.REPEATERPEA, c.PLANT_HEALTH, bullet_group, 1)
         self.shoot_timer = 0
 
     def attacking(self):
@@ -359,7 +359,7 @@ class RepeaterPea(Plant):
 
 class ThreePeaShooter(Plant):
     def __init__(self, x, y, bullet_groups, map_y):
-        Plant.__init__(self, x, y, c.THREEPEASHOOTER, c.PLANT_HEALTH, None)
+        Plant.__init__(self, x, y, c.THREEPEASHOOTER, c.PLANT_HEALTH, None, 0.75)
         self.shoot_timer = 0
         self.map_y = map_y
         self.bullet_groups = bullet_groups
@@ -378,7 +378,7 @@ class ThreePeaShooter(Plant):
 
 class SnowPeaShooter(Plant):
     def __init__(self, x, y, bullet_group):
-        Plant.__init__(self, x, y, c.SNOWPEASHOOTER, c.PLANT_HEALTH, bullet_group)
+        Plant.__init__(self, x, y, c.SNOWPEASHOOTER, c.PLANT_HEALTH, bullet_group, 0.85)
         self.shoot_timer = 0
 
     def attacking(self):
@@ -389,7 +389,7 @@ class SnowPeaShooter(Plant):
 
 class WallNut(Plant):
     def __init__(self, x, y):
-        Plant.__init__(self, x, y, c.WALLNUT, c.WALLNUT_HEALTH, None)
+        Plant.__init__(self, x, y, c.WALLNUT, c.WALLNUT_HEALTH, None, 1)
         self.load_images()
         self.cracked1 = False
         self.cracked2 = False
@@ -414,7 +414,7 @@ class WallNut(Plant):
 
 class CherryBomb(Plant):
     def __init__(self, x, y):
-        Plant.__init__(self, x, y, c.CHERRYBOMB, c.WALLNUT_HEALTH, None)
+        Plant.__init__(self, x, y, c.CHERRYBOMB, c.WALLNUT_HEALTH, None, 0.75)
         self.state = c.ATTACK
         self.start_boom = False
         self.bomb_timer = 0
@@ -427,7 +427,7 @@ class CherryBomb(Plant):
         width, height = rect.w, rect.h
                 
         old_rect = self.rect
-        image = tool.get_image(frame, 0, 0, width, height, c.BLACK, 1)
+        image = tool.get_image(frame, 0, 0, width, height, c.BLACK, 0.75)
         self.image = image
         self.rect = image.get_rect()
         self.rect.centerx = old_rect.centerx
@@ -452,7 +452,7 @@ class CherryBomb(Plant):
 
 class Chomper(Plant):
     def __init__(self, x, y):
-        Plant.__init__(self, x, y, c.CHOMPER, c.PLANT_HEALTH, None)
+        Plant.__init__(self, x, y, c.CHOMPER, c.PLANT_HEALTH, None, 0.65)
         self.animate_interval = 250
         self.digest_timer = 0
         self.digest_interval = 15000
@@ -470,7 +470,7 @@ class Chomper(Plant):
 
         frame_list = [self.idle_frames, self.attack_frames, self.digest_frames]
         name_list = [idle_name, attack_name, digest_name]
-        scale_list = [0.85, 0.85, 0.85]
+        scale_list = [0.65, 0.65, 0.65]
         rect_list = [(0, 0, 100, 114), None, None]
 
         for i, name in enumerate(name_list):
@@ -515,7 +515,7 @@ class Chomper(Plant):
 
 class PuffShroom(Plant):
     def __init__(self, x, y, bullet_group):
-        Plant.__init__(self, x, y, c.PUFFSHROOM, c.PLANT_HEALTH, bullet_group)
+        Plant.__init__(self, x, y, c.PUFFSHROOM, c.PLANT_HEALTH, bullet_group, 0.75)
         self.can_sleep = True
         self.shoot_timer = 0
 
@@ -530,7 +530,7 @@ class PuffShroom(Plant):
         name_list = [idle_name, sleep_name]
 
         for i, name in enumerate(name_list):
-            self.loadFrames(frame_list[i], name, 1)
+            self.loadFrames(frame_list[i], name, 0.75)
 
         self.frames = self.idle_frames
 
@@ -548,7 +548,7 @@ class PuffShroom(Plant):
 
 class PotatoMine(Plant):
     def __init__(self, x, y):
-        Plant.__init__(self, x, y, c.POTATOMINE, c.PLANT_HEALTH, None)
+        Plant.__init__(self, x, y, c.POTATOMINE, c.PLANT_HEALTH, None, 0.75)
         self.animate_interval = 300
         self.is_init = True
         self.init_timer = 0
@@ -569,7 +569,7 @@ class PotatoMine(Plant):
         name_list = [init_name, idle_name, explode_name]
 
         for i, name in enumerate(name_list):
-            self.loadFrames(frame_list[i], name, 1)  # idle 用黑色（透明背景）
+            self.loadFrames(frame_list[i], name, 0.75)  # idle 用黑色（透明背景）
         self.frames = self.init_frames
 
     def idling(self):
@@ -595,7 +595,7 @@ class PotatoMine(Plant):
 
 class Squash(Plant):
     def __init__(self, x, y):
-        Plant.__init__(self, x, y, c.SQUASH, c.PLANT_HEALTH, None)
+        Plant.__init__(self, x, y, c.SQUASH, c.PLANT_HEALTH, None, 0.4)
         self.orig_pos = (x, y)
         self.aim_timer = 0
         self.squashing = False
@@ -613,7 +613,7 @@ class Squash(Plant):
         name_list = [idle_name, aim_name, attack_name]
 
         for i, name in enumerate(name_list):
-            self.loadFrames(frame_list[i], name, 0.5) 
+            self.loadFrames(frame_list[i], name, 0.4)
 
 
         self.frames = self.idle_frames
@@ -650,12 +650,12 @@ class Squash(Plant):
 
 class Spikeweed(Plant):
     def __init__(self, x, y):
-        Plant.__init__(self, x, y, c.SPIKEWEED, c.PLANT_HEALTH, None)
+        Plant.__init__(self, x, y, c.SPIKEWEED, c.PLANT_HEALTH, None, 0.75)
         self.animate_interval = 200
         self.attack_timer = 0
 
     def loadImages(self, name, scale):
-        self.loadFrames(self.frames, name, 0.9)  # 使用默认黑色 colorkey
+        self.loadFrames(self.frames, name, 0.75)  # 使用默认黑色 colorkey
 
     def setIdle(self):
         print('spikeweed idle')
@@ -682,7 +682,7 @@ class Spikeweed(Plant):
 
 class Jalapeno(Plant):
     def __init__(self, x, y):
-        Plant.__init__(self, x, y, c.JALAPENO, c.PLANT_HEALTH, None)
+        Plant.__init__(self, x, y, c.JALAPENO, c.PLANT_HEALTH, None, 0.75)
         self.orig_pos = (x, y)
         self.state = c.ATTACK
         self.start_explode = False
@@ -692,9 +692,9 @@ class Jalapeno(Plant):
     def loadImages(self, name, scale):
         self.explode_frames = []
         explode_name = name + 'Explode'
-        self.loadFrames(self.explode_frames, explode_name, 1, c.WHITE)
+        self.loadFrames(self.explode_frames, explode_name, 0.75, c.WHITE)
 
-        self.loadFrames(self.frames, name, 1)  # idle 用默认黑色
+        self.loadFrames(self.frames, name, 0.75)  # idle 用默认黑色
 
     def setExplode(self):
         self.changeFrames(self.explode_frames)
@@ -724,7 +724,7 @@ class Jalapeno(Plant):
 
 class ScaredyShroom(Plant):
     def __init__(self, x, y, bullet_group):
-        Plant.__init__(self, x, y, c.SCAREDYSHROOM, c.PLANT_HEALTH, bullet_group)
+        Plant.__init__(self, x, y, c.SCAREDYSHROOM, c.PLANT_HEALTH, bullet_group, 0.75)
         self.can_sleep = True
         self.shoot_timer = 0
         self.cry_x_range = c.GRID_X_SIZE * 2
@@ -737,12 +737,12 @@ class ScaredyShroom(Plant):
         idle_name = name
         cry_name = name + 'Cry'
         sleep_name = name + 'Sleep'
-        
+
         frame_list = [self.idle_frames, self.cry_frames, self.sleep_frames]
         name_list = [idle_name, cry_name, sleep_name]
 
         for i, name in enumerate(name_list):
-            self.loadFrames(frame_list[i], name, 1, c.WHITE)
+            self.loadFrames(frame_list[i], name, 0.75, c.WHITE)
 
         self.frames = self.idle_frames
 
@@ -772,7 +772,7 @@ class ScaredyShroom(Plant):
 
 class SunShroom(Plant):
     def __init__(self, x, y, sun_group):
-        Plant.__init__(self, x, y, c.SUNSHROOM, c.PLANT_HEALTH, None)
+        Plant.__init__(self, x, y, c.SUNSHROOM, c.PLANT_HEALTH, None, 0.75)
         self.can_sleep = True
         self.animate_interval = 200
         self.sun_timer = 0
@@ -788,12 +788,12 @@ class SunShroom(Plant):
         idle_name = name
         big_name = name + 'Big'
         sleep_name = name + 'Sleep'
-        
+
         frame_list = [self.idle_frames, self.big_frames, self.sleep_frames]
         name_list = [idle_name, big_name, sleep_name]
 
         for i, name in enumerate(name_list):
-            self.loadFrames(frame_list[i], name, 1, c.WHITE)
+            self.loadFrames(frame_list[i], name, 0.75, c.WHITE)
 
         self.frames = self.idle_frames
 
@@ -814,7 +814,7 @@ class SunShroom(Plant):
 
 class IceShroom(Plant):
     def __init__(self, x, y):
-        Plant.__init__(self, x, y, c.ICESHROOM, c.PLANT_HEALTH, None)
+        Plant.__init__(self, x, y, c.ICESHROOM, c.PLANT_HEALTH, None, 0.75)
         self.can_sleep = True
         self.orig_pos = (x, y)
         self.start_freeze = False
@@ -832,7 +832,7 @@ class IceShroom(Plant):
         
         frame_list = [self.idle_frames, self.snow_frames, self.sleep_frames, self.trap_frames]
         name_list = [idle_name, snow_name, sleep_name, trap_name]
-        scale_list = [1, 1.5, 1, 1]
+        scale_list = [0.75, 0.75, 0.75, 0.75]
 
         for i, name in enumerate(name_list):
             self.loadFrames(frame_list[i], name, scale_list[i], c.WHITE)
@@ -871,7 +871,7 @@ class IceShroom(Plant):
 
 class HypnoShroom(Plant):
     def __init__(self, x, y):
-        Plant.__init__(self, x, y, c.HYPNOSHROOM, 1, None)
+        Plant.__init__(self, x, y, c.HYPNOSHROOM, 1, None, 0.75)
         self.can_sleep = True
         self.animate_interval = 200
 
@@ -886,13 +886,13 @@ class HypnoShroom(Plant):
         name_list = [idle_name, sleep_name]
 
         for i, name in enumerate(name_list):
-            self.loadFrames(frame_list[i], name, 1, c.WHITE)
+            self.loadFrames(frame_list[i], name, 0.75, c.WHITE)
 
         self.frames = self.idle_frames
 
 class WallNutBowling(Plant):
     def __init__(self, x, y, map_y, level):
-        Plant.__init__(self, x, y, c.WALLNUTBOWLING, 1, None)
+        Plant.__init__(self, x, y, c.WALLNUTBOWLING, 1, None, 0.75)
         self.map_y = map_y
         self.level = level
         self.init_rect = self.rect.copy()
@@ -905,7 +905,7 @@ class WallNutBowling(Plant):
         self.disable_hit_y = -1
 
     def loadImages(self, name, scale):
-        self.loadFrames(self.frames, name, 1, c.WHITE)
+        self.loadFrames(self.frames, name, 0.75, c.WHITE)
 
     def idling(self):
         if self.move_timer == 0:
@@ -973,7 +973,7 @@ class WallNutBowling(Plant):
 
 class RedWallNutBowling(Plant):
     def __init__(self, x, y):
-        Plant.__init__(self, x, y, c.REDWALLNUTBOWLING, 1, None)
+        Plant.__init__(self, x, y, c.REDWALLNUTBOWLING, 1, None, 0.75)
         self.orig_y = y
         self.explode_timer = 0
         self.explode_y_range = 1
@@ -991,12 +991,12 @@ class RedWallNutBowling(Plant):
 
         idle_name = name
         explode_name = name + 'Explode'
-        
+
         frame_list = [self.idle_frames, self.explode_frames]
         name_list = [idle_name, explode_name]
 
         for i, name in enumerate(name_list):
-            self.loadFrames(frame_list[i], name, 1, c.WHITE)
+            self.loadFrames(frame_list[i], name, 0.75, c.WHITE)
 
         self.frames = self.idle_frames
 

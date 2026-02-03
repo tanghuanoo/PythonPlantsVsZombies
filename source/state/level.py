@@ -449,11 +449,19 @@ class Level(tool.State):
 
         # 为倭瓜和食人花设置缩放比例
         if plant_name == c.SQUASH:
-            scale = 0.5
+            scale = 0.4
         elif plant_name == c.CHOMPER:
+            scale = 0.65
+        elif plant_name == c.SNOWPEASHOOTER:
             scale = 0.85
-        else:
+        elif plant_name == c.PEASHOOTER:
+            scale = 0.95
+        elif plant_name == c.REPEATERPEA:
             scale = 1
+        elif plant_name == c.WALLNUT:
+            scale = 1
+        else:
+            scale = 0.75
 
         frame = frame_list[0]
         actual_rect = frame.get_rect()
