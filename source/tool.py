@@ -8,6 +8,7 @@ import json
 from abc import abstractmethod
 import pygame as pg
 from . import constants as c
+from .resource_path import resource_path
 
 _LOADING_SURFACE = None
 _LOADING_RECT = None
@@ -261,14 +262,14 @@ def load_all_gfx(directory, colorkey=c.WHITE, accept=('.png', '.jpg', '.bmp', '.
     return graphics
 
 def loadZombieImageRect():
-    file_path = os.path.join('source', 'data', 'entity', 'zombie.json')
+    file_path = resource_path('source', 'data', 'entity', 'zombie.json')
     f = open(file_path)
     data = json.load(f)
     f.close()
     return data[c.ZOMBIE_IMAGE_RECT]
 
 def loadPlantImageRect():
-    file_path = os.path.join('source', 'data', 'entity', 'plant.json')
+    file_path = resource_path('source', 'data', 'entity', 'plant.json')
     f = open(file_path)
     data = json.load(f)
     f.close()
@@ -355,8 +356,8 @@ _LOADING_SURFACE = _loading_text
 _LOADING_RECT = _loading_rect
 del _loading_font
 
-GFX = load_all_gfx(os.path.join("resources","graphics"))
-ORIGIN_GFX = load_all_gfx(os.path.join("resources","origin_graphics"))
+GFX = load_all_gfx(resource_path("resources", "graphics"))
+ORIGIN_GFX = load_all_gfx(resource_path("resources", "origin_graphics"))
 _LOADING_SURFACE = None
 _LOADING_RECT = None
 ZOMBIE_RECT = loadZombieImageRect()

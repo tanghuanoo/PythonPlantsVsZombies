@@ -7,6 +7,7 @@ import pygame as pg
 from .. import tool
 from .. import constants as c
 from ..component import map, plant, zombie, menubar
+from ..resource_path import resource_path
 
 
 class CrazyModeSpawner:
@@ -100,7 +101,7 @@ class Level(tool.State):
 
     def loadMap(self):
         map_file = 'level_' + str(self.game_info[c.LEVEL_NUM]) + '.json'
-        file_path = os.path.join('source', 'data', 'map', map_file)
+        file_path = resource_path('source', 'data', 'map', map_file)
         f = open(file_path)
         self.map_data = json.load(f)
         f.close()

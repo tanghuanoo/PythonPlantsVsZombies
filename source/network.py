@@ -3,6 +3,7 @@ __author__ = 'marble_xu'
 import configparser
 import os
 import requests
+from .resource_path import user_data_path
 
 # 默认配置
 DEFAULT_SERVER_URL = 'http://127.0.0.1:5000'
@@ -16,7 +17,7 @@ class NetworkManager:
         self.server_url = DEFAULT_SERVER_URL
         self.timeout = DEFAULT_TIMEOUT
         self.session = requests.Session()
-        self.config_path = os.path.join('source', 'config.ini')
+        self.config_path = user_data_path('config.ini')
         self.load_config()
 
     def load_config(self):
