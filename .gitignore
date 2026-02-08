@@ -20,6 +20,7 @@ venv.bak/
 *~
 .project
 .pydevproject
+.claude/
 
 # 配置文件
 *.ini
