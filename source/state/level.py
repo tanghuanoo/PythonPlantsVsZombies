@@ -99,6 +99,36 @@ class Level(tool.State):
         t4 = time.time()
         print(f'[DEBUG] Level.startup: map={t1-t0:.3f}s, loadMap={t2-t1:.3f}s, setupBg={t3-t2:.3f}s, initState={t4-t3:.3f}s')
 
+    def cleanup(self):
+        """清理关卡资源，避免内存泄漏"""
+        # 清理所有精灵组
+        if hasattr(self, 'sun_group'):
+            self.sun_group.empty()
+        if hasattr(self, 'head_group'):
+            self.head_group.empty()
+
+        # 清理每行的精灵组
+        if hasattr(self, 'plant_groups'):
+            for group in self.plant_groups:
+                group.empty()
+        if hasattr(self, 'zombie_groups'):
+            for group in self.zombie_groups:
+                group.empty()
+        if hasattr(self, 'hypno_zombie_groups'):
+            for group in self.hypno_zombie_groups:
+                group.empty()
+        if hasattr(self, 'bullet_groups'):
+            for group in self.bullet_groups:
+                group.empty()
+
+        # 清理鼠标图像
+        if hasattr(self, 'drag_plant') and self.drag_plant:
+            self.removeMouseImage()
+
+        # 调用父类的cleanup
+        self.done = False
+        return self.persist
+
     def collide_with_hitbox(self, sprite1, sprite2):
         '''使用僵尸的 hitbox 进行碰撞检测'''
         # 如果僵尸正在死亡动画中，返回 False 让子弹继续检测后面的僵尸

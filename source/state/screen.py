@@ -11,7 +11,6 @@ class Screen(tool.State):
 
     def startup(self, current_time, persist):
         self.start_time = current_time
-        self.next = c.LEVEL
         self.persist = persist
         self.game_info = persist
         name = self.getImageName()

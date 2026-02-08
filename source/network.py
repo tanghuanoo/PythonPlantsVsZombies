@@ -7,7 +7,7 @@ from .resource_path import user_data_path
 
 # 默认配置
 DEFAULT_SERVER_URL = 'http://127.0.0.1:5000'
-DEFAULT_TIMEOUT = 3
+DEFAULT_TIMEOUT = 1  # 降低到1秒，避免长时间等待
 
 
 class NetworkManager:

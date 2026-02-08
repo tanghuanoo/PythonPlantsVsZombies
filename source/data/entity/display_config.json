@@ -1,0 +1,121 @@
+{
+  "default": {
+    "scale_mode": "keep_ratio",
+    "quality": "smooth",
+    "enable_multipass": true,
+    "multipass_threshold": 3.0,
+    "max_step_size": 2.0
+  },
+  "plants": {
+    "default_size": {"width": 80, "height": 80},
+    "scale_mode": "keep_ratio",
+    "specific": {
+      "SunFlower": {"width": 73, "height": 74},
+      "Peashooter": {"width": 71, "height": 71},
+      "WallNut": {"width": 65, "height": 73},
+      "Chomper": {"width": 101, "height": 137},
+      "SnowPea": {"width": 71, "height": 71},
+      "Threepeater": {"width": 73, "height": 71},
+      "RepeaterPea": {"width": 71, "height": 71},
+      "CherryBomb": {"width": 112, "height": 81},
+      "PuffShroom": {"width": 35, "height": 66},
+      "PotatoMine": {"width": 75, "height": 55},
+      "Squash": {"width": 100, "height": 226},
+      "Spikeweed": {"width": 86, "height": 35},
+      "Jalapeno": {"width": 68, "height": 89},
+      "ScaredyShroom": {"width": 57, "height": 71},
+      "SunShroom": {"width": 59, "height": 61},
+      "IceShroom": {"width": 63, "height": 68},
+      "HypnoShroom": {"width": 71, "height": 72},
+      "WallNutBowling": {"width": 65, "height": 73},
+      "RedWallNutBowling": {"width": 65, "height": 73}
+    }
+  },
+  "zombies": {
+    "default_size": {"width": 90, "height": 120},
+    "scale_mode": "keep_ratio",
+    "specific": {
+      "Zombie": {"width": 115, "height": 120},
+      "ConeheadZombie": {"width": 115, "height": 120},
+      "BucketheadZombie": {"width": 115, "height": 120},
+      "FlagZombie": {"width": 138, "height": 120},
+      "NewspaperZombie": {"width": 138, "height": 120}
+    }
+  },
+  "bullets": {
+    "default_size": {"width": 28, "height": 34},
+    "scale_mode": "keep_ratio",
+    "specific": {
+      "PeaNormal": {"width": 28, "height": 34},
+      "PeaIce": {"width": 30, "height": 34},
+      "BulletMushRoom": {"width": 55, "height": 21}
+    }
+  },
+  "ui": {
+    "scale_mode": "keep_ratio",
+    "specific": {
+      "cards": {
+        "width": 64,
+        "height": 90,
+        "scale_mode": "keep_ratio"
+      },
+      "ChooserBackground": {
+        "width": 522,
+        "height": 87,
+        "scale_mode": "keep_ratio"
+      },
+      "PanelBackground": {
+        "width": 465,
+        "height": 513,
+        "scale_mode": "keep_ratio"
+      },
+      "MoveBackground": {
+        "width": 516,
+        "height": 86,
+        "scale_mode": "keep_ratio"
+      },
+      "StartButton": {
+        "width": 154,
+        "height": 37,
+        "scale_mode": "keep_ratio"
+      },
+      "MainMenu": {
+        "width": 800,
+        "height": 600,
+        "scale_mode": "keep_ratio"
+      },
+      "Adventure_0": {
+        "width": 280,
+        "height": 130,
+        "scale_mode": "keep_ratio"
+      },
+      "Adventure_1": {
+        "width": 280,
+        "height": 130,
+        "scale_mode": "keep_ratio"
+      },
+      "GameVictory": {
+        "width": 800,
+        "height": 600,
+        "scale_mode": "keep_ratio"
+      },
+      "GameLoose": {
+        "width": 800,
+        "height": 600,
+        "scale_mode": "keep_ratio"
+      }
+    }
+  },
+  "effects": {
+    "scale_mode": "keep_ratio",
+    "specific": {
+      "Boom": {"width": 100, "height": 100},
+      "IceTrap": {"width": 90, "height": 90},
+      "car": {"width": 80, "height": 60}
+    }
+  },
+  "sun": {
+    "default_size": {"width": 78, "height": 78},
+    "scale_mode": "keep_ratio"
+  }
+}

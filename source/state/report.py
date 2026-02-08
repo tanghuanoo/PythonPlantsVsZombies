@@ -1,6 +1,7 @@
 __author__ = 'marble_xu'
 
 import pygame as pg
+import threading
 from .. import tool
 from .. import constants as c
 from ..language import LANG
@@ -40,6 +41,10 @@ class GameReportScreen(tool.State):
         self.refresh_interval = 10000  # 10秒刷新一次
         self.last_refresh_time = 0
 
+        # 网络请求线程状态
+        self.network_thread = None
+        self.is_loading_data = False
+
         # 加载背景图片
         self.background = None
         self.load_background()
@@ -71,25 +76,37 @@ class GameReportScreen(tool.State):
         # 初始化刷新时间
         self.last_refresh_time = current_time
 
-        # 如果是在线模式，提交成绩并获取排行榜
+        # 如果是在线模式，在后台线程提交成绩并获取排行榜
         if not self.is_offline:
-            try:
-                player_id = self.game_info.get('player_id')
-                if player_id:
-                    # 提交成绩
-                    result = NETWORK.submit_score(
-                        player_id,
-                        self.score,
-                        self.game_duration,
-                        self.zombies_killed
-                    )
-                    self.rank = result.get('rank')
+            player_id = self.game_info.get('player_id')
+            if player_id:
+                self.is_loading_data = True
+                self.network_thread = threading.Thread(
+                    target=self._load_network_data,
+                    args=(player_id,),
+                    daemon=True
+                )
+                self.network_thread.start()
 
-                    # 获取排行榜
-                    self.leaderboard = NETWORK.get_leaderboard(10)
-            except Exception as e:
-                print(f'Failed to submit score or get leaderboard: {e}')
-                self.is_offline = True
+    def _load_network_data(self, player_id):
+        """在后台线程加载网络数据，避免阻塞主循环"""
+        try:
+            # 提交成绩（使用较短的超时时间）
+            result = NETWORK.submit_score(
+                player_id,
+                self.score,
+                self.game_duration,
+                self.zombies_killed
+            )
+            self.rank = result.get('rank')
+
+            # 获取排行榜
+            self.leaderboard = NETWORK.get_leaderboard(10)
+        except Exception as e:
+            print(f'Failed to submit score or get leaderboard: {e}')
+            self.is_offline = True
+        finally:
+            self.is_loading_data = False
 
     def update(self, surface, current_time, mouse_pos, mouse_click, events, mouse_hover_pos=None):
         self.current_time = current_time
@@ -131,12 +148,27 @@ class GameReportScreen(tool.State):
             pg.event.post(pg.event.Event(pg.QUIT))
 
     def refresh_leaderboard(self):
-        """刷新排行榜数据"""
+        """刷新排行榜数据（后台线程，避免阻塞）"""
+        if self.is_loading_data:
+            # 如果正在加载，跳过本次刷新
+            return
+
+        self.is_loading_data = True
+        thread = threading.Thread(
+            target=self._refresh_leaderboard_thread,
+            daemon=True
+        )
+        thread.start()
+
+    def _refresh_leaderboard_thread(self):
+        """后台线程刷新排行榜"""
         try:
             self.leaderboard = NETWORK.get_leaderboard(10)
             print(f'Leaderboard refreshed at {self.current_time}')
         except Exception as e:
             print(f'Failed to refresh leaderboard: {e}')
+        finally:
+            self.is_loading_data = False
 
     def draw(self, surface):
         """绘制游戏报告页面 - PVZ风格"""
